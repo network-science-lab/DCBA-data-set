@@ -1,0 +1,34 @@
+run:
+  experiment_type: "generate"
+  rng_seed: 43  # seed of the random numbers generator (to make results reproducible), "" no seeding
+
+mln_config:
+  n: 1000 # number of actors
+  edges_cor: [  # desired edges correlation between layers (a symmetric matrix across its diagonal)
+    [1.0, 0.15, 0.15, 0.12],
+    [0.15, 1.0, 0.2, 0.1],
+    [0.15, 0.2, 1.0, 0.2],
+    [0.12, 0.1, 0.2, 1.0],
+  ]
+  layer_params:  # desired layer parameters - q is normalised to n; delta, delta, s, S to q
+    q: [1, 0.75, 0.5, 0.25]  # fraction of active actors
+    tau: [1, 0.75, 0.5, 0.25]  # correlation coef. between degrees and labels
+    r: [1, 0.75, 0.5, 0.25]  # correlation between communities and reference layer (1)
+    gamma: [2.5, 2.5, 2.5, 2.5]  # exponent of power-law degree distribution
+    delta: [0.0020, 0.0027, 0.0040, 0.0080]  # min. degree
+    Delta: [0.0250, 0.0333, 0.0400, 0.0800]  # max. degree
+    beta: [1.5, 1.5, 1.7, 1.7]  # exponent of power-law community size distribution
+    s: [0.0080, 0.0107, 0.0160, 0.0320]  # min. community size
+    S: [0.0320, 0.0427, 0.0640, 0.1280]  # max. community size
+    xi: [0.2, 0.2, 0.2, 0.1]  # level of noise
+  d_max_iter: 1000 # maximum number of iterations for sampling degrees
+  c_max_iter: 1000 # maximum number of iterations for sampling cluster sizes
+  t: 100 # number of batches for edge rewiring
+  eps: 0.05 # percentage of edges to be rewired in each rewiring batch
+  d: 2 # dimensionality of latent space
+  edges_filename: edges.dat  # name of file for output edges
+  communities_filename: communities.dat  # name of file for output communities
+
+generator:
+  repetitions: 5  # number of networks to generate from the given congituraiton
+  out_dir: "./examples/generate" # directory to save networks in
