@@ -14,7 +14,7 @@ from juliacall import Main as jl
 @dataclass
 class MLNConfig:
     """
-    A wrapper for class for class for jl.MLNABCDGraphGenerator.MLNConfig.
+    A wrapper for jl.MLNABCDGraphGenerator.MLNConfig.
 
     TODO: we can get rid of storing a part of the config in files (see commented out code and:
     https://github.com/KrainskiL/MLNABCDGraphGenerator.jl/blob/main/src/auxiliary.jl#L19)

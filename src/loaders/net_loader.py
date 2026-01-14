@@ -7,10 +7,20 @@ from typing import Callable
 
 import network_diffusion as nd
 import networkx as nx
+import pandas as pd
 from tqdm import tqdm
 
 from src.loaders.constants import MLN_ABCD_DATA_PATH
-from src.mln_abcd.julia_reader import load_edgelist
+
+
+def load_edgelist(edgelist_path: Path) -> nd.MultilayerNetwork:
+    edge_list = pd.read_csv(edgelist_path, sep="\t", names=["source", "target", "layer"])
+    layer_names = edge_list["layer"].unique()
+    layer_graphs = {}
+    for layer_name in layer_names:
+        el_layer = edge_list.loc[edge_list["layer"] == layer_name]
+        layer_graphs[str(layer_name)] = nx.from_pandas_edgelist(el_layer)
+    return nd.MultilayerNetwork(layers=layer_graphs)
 
 
 def read_mlnabcd_networks(net_name: str) -> dict[str, nd.MultilayerNetwork]:
