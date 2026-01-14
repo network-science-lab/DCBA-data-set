@@ -1,7 +1,6 @@
 """Python wrapper for ABCDGraphGenerator.jl Julia package."""
 
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Optional, Dict, Any
 
 import numpy as np
@@ -28,6 +27,8 @@ class ABCDConfig:
     isCL: Optional[bool] = False
     seed: Optional[int] = None
     nout: int = 0
+    edges_filename: Optional[str] = None
+    communities_filename: Optional[str] = None
 
     @classmethod
     def from_dict(cls, cfg: Dict[str, Any]) -> "ABCDConfig":
@@ -88,7 +89,7 @@ class ABCDGraphGenerator:
             c.c_max_iter,
         )
         if c.nout > 0:
-            jl.pushfirst_(coms, c.nout)
+            jl.pushfirst_b(coms, c.nout)
         params = jl.ABCDGraphGenerator.ABCDParams(
             degs,
             coms,
@@ -119,17 +120,28 @@ class ABCDGraphGenerator:
             "edges": edges_df,
             "communities": communities_df,
         }
-    
+
     def __call__(self, config: ABCDConfig) -> Dict[str, Any]:
         """Generate a graph based on the provided configuration."""
         self._validate(config)
-        return self._run(config)
+        result = self._run(config)
+        result["edges"].to_csv(config.edges_filename, index=False)
+        result["communities"].to_csv(config.communities_filename, index=False)
+        return result
 
 
 if __name__ == "__main__":
+    import yaml
+    from pathlib import Path
+
+    out_dir = Path("./examples/generate-abcd")
+    out_dir.mkdir(exist_ok=True, parents=True)
+
     gen = ABCDGraphGenerator()
-    config = ABCDConfig(
-        n=100,
+
+    config_inline = ABCDConfig(
+        seed=42,
+        n=1000,
         t1=2.5,
         d_min=10,
         d_max=100,
@@ -140,8 +152,16 @@ if __name__ == "__main__":
         c_max_iter=100,
         xi=0.2,
         islocal=False,
-        seed=42,
         nout=0,
+        edges_filename=str(out_dir / "edges.dat"),
+        communities_filename=str(out_dir / "communities.dat"),
     )
-    result = gen(config)
-    print(result)
+
+    result = gen(config_inline)
+
+    with open("scripts/configs/example_generate/abcd.yaml") as f:
+        _config = yaml.safe_load(f)
+    config = _config["net_config"]
+    config["seed"] = _config["run"]["rng_seed"]
+    net_config = ABCDConfig.from_dict(config)
+    result = gen(net_config)

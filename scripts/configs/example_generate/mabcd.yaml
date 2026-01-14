@@ -1,5 +1,5 @@
 run:
-  experiment_type: "generate"
+  experiment_type: "generate-mabcd"
   rng_seed: 43  # seed of the random numbers generator (to make results reproducible), "" no seeding
 
 mln_config:

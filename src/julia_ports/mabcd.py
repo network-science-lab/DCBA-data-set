@@ -2,7 +2,6 @@
 
 import tempfile
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -180,7 +179,7 @@ if __name__ == "__main__":
     import yaml
     from pathlib import Path
     
-    out_dir = Path("./examples/generate")
+    out_dir = Path("./examples/generate-mabcd")
     out_dir.mkdir(exist_ok=True, parents=True)
 
     # generate from code
