@@ -118,6 +118,7 @@ class MLNABCDGraphGenerator:
             jl.seval("using MLNABCDGraphGenerator")
         except JuliaError:
             self.install_julia_dependencies()
+            jl.seval("using MLNABCDGraphGenerator")
         
         with tempfile.TemporaryDirectory() as tmpdir:
 
@@ -169,6 +170,9 @@ class MLNABCDGraphGenerator:
 
             # Save communities to file
             jl.MLNABCDGraphGenerator.write_communities(config, coms)
+
+            # a = jl.ABCDGraphGenerator.sample_degrees(3, 5, 50, 10100, 1000)
+            # print(a)
 
 
 if __name__ == "__main__":
