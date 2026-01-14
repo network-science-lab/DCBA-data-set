@@ -184,11 +184,33 @@ if __name__ == "__main__":
     out_dir.mkdir(exist_ok=True, parents=True)
 
     # generate from code
-    layer_params = MLNConfig.get_layer_params(1000, "scripts/configs/example_generate/layers.csv")
-    edges_cor = MLNConfig.get_edges_cor("scripts/configs/example_generate/edges.csv")
+    n = 1000
+    layer_params = MLNConfig.get_layer_params(
+        n=n,
+        lp={
+            "q": [1, 0.75, 0.5, 0.25],
+            "tau": [1, 0.75, 0.5, 0.25],
+            "r": [1, 0.75, 0.5, 0.25],
+            "gamma": [2.5, 2.5, 2.5, 2.5],
+            "delta": [0.0020, 0.0027, 0.0040, 0.0080],
+            "Delta": [0.0250, 0.0333, 0.0400, 0.0800],
+            "beta": [1.5, 1.5, 1.7, 1.7],
+            "s": [0.0080, 0.0107, 0.0160, 0.0320],
+            "S": [0.0320, 0.0427, 0.0640, 0.1280],
+            "xi": [0.2, 0.2, 0.2, 0.1],
+        }
+    )                                   
+    edges_cor = MLNConfig.get_edges_cor(
+        [
+            [1.0, 0.15, 0.15, 0.12],
+            [0.15, 1.0, 0.2, 0.1],
+            [0.15, 0.2, 1.0, 0.2],
+            [0.12, 0.1, 0.2, 1.0],
+        ]
+    )
     mln_config = MLNConfig(
         seed=43,
-        n=1000,
+        n=n,
         edges_cor=edges_cor,
         layer_params=layer_params,
         d_max_iter=1000,
@@ -202,7 +224,7 @@ if __name__ == "__main__":
     MLNABCDGraphGenerator()(config=mln_config)
 
     # or from file
-    with open("scripts/configs/example_generate/config.yaml", "r") as file:
+    with open("scripts/configs/example_generate/mabcd.yaml", "r") as file:
         _config = yaml.safe_load(file)
     config = _config["mln_config"]
     config["seed"] = _config["run"]["rng_seed"]
