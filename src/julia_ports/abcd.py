@@ -31,7 +31,7 @@ class ABCDConfig:
     communities_filename: Optional[str] = None
 
     @classmethod
-    def from_dict(cls, cfg: Dict[str, Any]) -> "ABCDConfig":
+    def from_yaml(cls, cfg: Dict[str, Any]) -> "ABCDConfig":
         """Create an instance from a dictionary."""
         return cls(**cfg)
 
@@ -163,5 +163,5 @@ if __name__ == "__main__":
         _config = yaml.safe_load(f)
     config = _config["net_config"]
     config["seed"] = _config["run"]["rng_seed"]
-    net_config = ABCDConfig.from_dict(config)
+    net_config = ABCDConfig.from_yaml(config)
     result = gen(net_config)

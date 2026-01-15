@@ -1,7 +1,7 @@
 import argparse
 import yaml
 
-from src.generator import run_experiments as re_generator
+from src.generator import ABCDGenerator, MABCDGenerator
 from src.utils import set_rng_seed
 
 
@@ -12,7 +12,8 @@ def parse_args(*args):
         help="Experiment config file (default: config.yaml).",
         nargs="?",
         type=str,
-        default="scripts/configs/example_generate/config.yaml",
+        default="scripts/configs/example_generate/mabcd.yaml",
+        # default="scripts/configs/example_generate/abcd.yaml",
     )
     return parser.parse_args(*args)
 
@@ -30,8 +31,10 @@ if __name__ == "__main__":
 
     if (experiment_type := config["run"].get("experiment_type")) == "simulate":
         entrypoint = lambda x: x
-    elif experiment_type == "generate":
-        entrypoint = re_generator
+    elif experiment_type == "generate-mabcd":
+        entrypoint = MABCDGenerator()
+    elif experiment_type == "generate-abcd":
+        entrypoint = ABCDGenerator()
     else:
         raise ValueError(f"Unknown experiment type {experiment_type}")
 

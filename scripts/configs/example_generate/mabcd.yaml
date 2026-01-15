@@ -2,7 +2,7 @@ run:
   experiment_type: "generate-mabcd"
   rng_seed: 43  # seed of the random numbers generator (to make results reproducible), "" no seeding
 
-mln_config:
+net_config:
   n: 1000 # number of actors
   edges_cor: [  # desired edges correlation between layers (a symmetric matrix across its diagonal)
     [1.0, 0.15, 0.15, 0.12],
@@ -31,4 +31,4 @@ mln_config:
 
 generator:
   repetitions: 5  # number of networks to generate from the given congituraiton
-  out_dir: "./examples/generate" # directory to save networks in
+  out_dir: "./examples/generate_mabcd" # directory to save networks in

@@ -28,4 +28,4 @@ net_config:
 
 generator:
   repetitions: 5  # number of networks to generate from the given congituraiton
-  out_dir: "./examples/generate" # directory to save networks in
+  out_dir: "./examples/generate_abcd" # directory to save networks in

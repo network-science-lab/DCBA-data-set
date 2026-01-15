@@ -1,8 +1,10 @@
 """A Python wrapper to the MLNABCDGraphGenerator Julia package."""
 
+import pathlib
 import tempfile
 from dataclasses import dataclass
 from typing import Any
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
