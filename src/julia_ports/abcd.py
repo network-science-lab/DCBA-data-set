@@ -35,7 +35,7 @@ class ABCDConfig:
         if self.mu is not None and self.xi is not None:
             raise ValueError("inconsistent data: only μ or ξ may be provided")
         if self.mu is not None and self.nout > 0:
-            raise ValueError("μ is not supported with outliers")
+            raise ValueError("mu is not supported with outliers")
         if self.nout > self.n:
             raise ValueError("number of outliers cannot be larger than graph size")
         if self.islocal and self.nout > 0:
@@ -44,6 +44,8 @@ class ABCDConfig:
             raise ValueError("Chung-Lu graph is not supported with outliers")
         if self.c_max > self.n:
             raise ValueError("c_max cannot be larger than graph size")
+        if self.xi and self.islocal:
+            raise ValueError("when xi is provided local model is not allowed")
 
     @classmethod
     def from_yaml(cls, cfg: Dict[str, Any]) -> "ABCDConfig":
