@@ -1,7 +1,8 @@
 import argparse
 import yaml
 
-from src.generator import ABCDGenerator, MABCDGenerator
+from src.net_generator import ABCDGenerator, MABCDGenerator
+from src.ds_generator import DatasetGenerator
 from src.utils import set_rng_seed
 
 
@@ -12,8 +13,9 @@ def parse_args(*args):
         help="Experiment config file (default: config.yaml).",
         nargs="?",
         type=str,
-        default="scripts/configs/example_generate/mabcd.yaml",
+        # default="scripts/configs/example_generate/mabcd.yaml",
         # default="scripts/configs/example_generate/abcd.yaml",
+        default="scripts/configs/example_generate/dataset.yaml",
     )
     return parser.parse_args(*args)
 
@@ -29,8 +31,8 @@ if __name__ == "__main__":
         print(f"Setting randomness seed as {random_seed}!")
         set_rng_seed(config["run"]["random_seed"])
 
-    if (experiment_type := config["run"].get("experiment_type")) == "simulate":
-        entrypoint = lambda x: x
+    if (experiment_type := config["run"].get("experiment_type")) == "generate-dataset":
+        entrypoint = DatasetGenerator()
     elif experiment_type == "generate-mabcd":
         entrypoint = MABCDGenerator()
     elif experiment_type == "generate-abcd":

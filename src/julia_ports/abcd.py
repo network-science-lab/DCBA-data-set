@@ -30,6 +30,21 @@ class ABCDConfig:
     edges_filename: Optional[str] = None
     communities_filename: Optional[str] = None
 
+    def __post_init__(self) -> None:
+        """Validate the configuration parameters."""
+        if self.mu is not None and self.xi is not None:
+            raise ValueError("inconsistent data: only μ or ξ may be provided")
+        if self.mu is not None and self.nout > 0:
+            raise ValueError("μ is not supported with outliers")
+        if self.nout > self.n:
+            raise ValueError("number of outliers cannot be larger than graph size")
+        if self.islocal and self.nout > 0:
+            raise ValueError("local graph is not supported with outliers")
+        if self.isCL and self.nout > 0:
+            raise ValueError("Chung-Lu graph is not supported with outliers")
+        if self.c_max > self.n:
+            raise ValueError("c_max cannot be larger than graph size")
+
     @classmethod
     def from_yaml(cls, cfg: Dict[str, Any]) -> "ABCDConfig":
         """Create an instance from a dictionary."""
@@ -52,20 +67,6 @@ class ABCDGraphGenerator:
         except JuliaError:
             self.install_julia_dependencies()
             jl.seval("using ABCDGraphGenerator")
-
-    @staticmethod
-    def _validate(c: ABCDConfig) -> None:
-        """Validate the configuration parameters."""
-        if c.mu is not None and c.xi is not None:
-            raise ValueError("inconsistent data: only μ or ξ may be provided")
-        if c.mu is not None and c.nout > 0:
-            raise ValueError("μ is not supported with outliers")
-        if c.nout > c.n:
-            raise ValueError("number of outliers cannot be larger than graph size")
-        if c.islocal and c.nout > 0:
-            raise ValueError("local graph is not supported with outliers")
-        if c.isCL and c.nout > 0:
-            raise ValueError("Chung-Lu graph is not supported with outliers")
 
     def _run(self, c: ABCDConfig) -> Dict[str, Any]:
         """Execute the graph generation process."""
@@ -123,7 +124,6 @@ class ABCDGraphGenerator:
 
     def __call__(self, config: ABCDConfig) -> Dict[str, Any]:
         """Generate a graph based on the provided configuration."""
-        self._validate(config)
         result = self._run(config)
         result["edges"].to_csv(config.edges_filename, index=False)
         result["communities"].to_csv(config.communities_filename, index=False)

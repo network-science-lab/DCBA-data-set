@@ -1,5 +1,4 @@
 # DCBA Data Set
 
-- replace mABCD with ABCD
-- add a random config generator
+- validate if config generated is valid
 - add DVC remote

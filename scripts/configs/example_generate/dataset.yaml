@@ -1,0 +1,28 @@
+run:
+  experiment_type: "generate-dataset"
+  rng_seed: 43
+
+net_ranges:
+  n: [1000, 10000]
+  t1: [2, 4]
+  d_min: [5, 10]
+  d_max: [50, 100]
+  d_max_iter: 1000
+  t2: [2, 3]  
+  c_min: [50, 100]
+  c_max: [100, 2000]
+  c_max_iter: 1000
+  xi: [0.01, 0.5]
+  islocal: False
+  isCL: False
+  nout: [0, 100]
+  edges_filename: edges.dat
+  communities_filename: communities.dat
+
+generator:
+  net_type: "abcd"  # type of network to generate: "abcd" or "mabcd"
+  replicas: 5  # number of networks to generate from the given configuration
+  instances: 10  # number of valid configurations to use
+  out_dir: "./examples/generate_dataset" # directory to save data in
+
+# Total number of generated networks is replicas * instances
