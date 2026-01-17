@@ -1,5 +1,7 @@
 """A script with functions to facilitate liading simulation's parameters and input data."""
 
+# TODO: review this code and decidee whether it's needed
+
 import itertools
 import json
 import random

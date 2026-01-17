@@ -1,5 +1,7 @@
 """A loader for multilayer networks stored in the dataset."""
 
+# TODO: review this code and decidee whether it's needed
+
 from functools import wraps
 from glob import glob
 from pathlib import Path

@@ -1,3 +1,7 @@
+"""Utility functions for various common tasks."""
+
+# TODO: review this code and decidee whether it's needed
+
 import datetime
 import warnings
 

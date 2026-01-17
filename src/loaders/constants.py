@@ -1,5 +1,7 @@
 """A script with strings used across module in form of variables."""
 
+# TODO: review this code and decidee whether it's needed
+
 from functools import wraps
 from pathlib import Path
 from typing import Callable
