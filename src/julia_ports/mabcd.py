@@ -14,12 +14,7 @@ from juliacall import Main as jl
 
 @dataclass
 class MLNConfig:
-    """
-    A wrapper for jl.MLNABCDGraphGenerator.MLNConfig.
-
-    TODO: we can get rid of storing a part of the config in files (see commented out code and:
-    https://github.com/KrainskiL/MLNABCDGraphGenerator.jl/blob/main/src/auxiliary.jl#L19)
-    """
+    """A wrapper for jl.MLNABCDGraphGenerator.MLNConfig."""
     seed: int
     n: int
     edges_cor: pd.DataFrame
@@ -172,9 +167,6 @@ class MLNABCDGraphGenerator:
             # Save communities to file
             jl.MLNABCDGraphGenerator.write_communities(config, coms)
 
-            # a = jl.ABCDGraphGenerator.sample_degrees(3, 5, 50, 10100, 1000)
-            # print(a)
-
 
 if __name__ == "__main__":
 
@@ -219,8 +211,8 @@ if __name__ == "__main__":
         t=100,
         eps=0.05,
         d=2,
-        edges_filename=str(out_dir / "edges.dat"),
-        communities_filename=str(out_dir / "communities.dat"),
+        edges_filename=str(out_dir / "_edges.dat"),
+        communities_filename=str(out_dir / "_communities.dat"),
     )
     MLNABCDGraphGenerator()(config=mln_config)
 
@@ -229,5 +221,7 @@ if __name__ == "__main__":
         _config = yaml.safe_load(file)
     config = _config["mln_config"]
     config["seed"] = _config["run"]["rng_seed"]
+    config["edges_filename"] = str(out_dir / config["edges_filename"])
+    config["communities_filename"] = str(out_dir / config["communities_filename"])
     mln_config = MLNConfig.from_yaml(config)
     MLNABCDGraphGenerator()(config=mln_config)
