@@ -1,5 +1,4 @@
 from dataclasses import dataclass, asdict
-from typing import List
 import yaml
 from pathlib import Path
 
@@ -13,23 +12,23 @@ Creates config files for the DCBA graph generation framework.
 @dataclass
 class LayerParams:
     """Parameters for individual network layers."""
-    q: List[float]  # fraction of active actors
-    tau: List[float]  # correlation between degrees and labels
-    r: List[float]  # correlation with reference layer
-    gamma: List[float]  # power-law degree exponent
-    delta: List[float]  # min degree
-    Delta: List[float]  # max degree
-    beta: List[float]  # power-law community size exponent
-    s: List[float]  # min community size
-    S: List[float]  # max community size
-    xi: List[float]  # noise level
+    q: list[float]  # fraction of active actors
+    tau: list[float]  # correlation between degrees and labels
+    r: list[float]  # correlation with reference layer
+    gamma: list[float]  # power-law degree exponent
+    delta: list[float]  # min degree
+    Delta: list[float]  # max degree
+    beta: list[float]  # power-law community size exponent
+    s: list[float]  # min community size
+    S: list[float]  # max community size
+    xi: list[float]  # noise level
 
 
 @dataclass
 class MLNConfig:
     """Configuration for multilayer network generation."""
     n: int
-    edges_cor: List[List[float]]
+    edges_cor: list[list[float]]
     layer_params: LayerParams
     d_max_iter: int = 1000
     c_max_iter: int = 1000

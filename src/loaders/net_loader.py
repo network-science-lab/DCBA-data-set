@@ -2,6 +2,7 @@
 
 # TODO: review this code and decidee whether it's needed
 
+import logging
 from functools import wraps
 from glob import glob
 from pathlib import Path
@@ -11,6 +12,8 @@ import network_diffusion as nd
 import networkx as nx
 import pandas as pd
 from tqdm import tqdm
+
+logger = logging.getLogger(__name__)
 
 from src.loaders.constants import MLN_ABCD_DATA_PATH
 
@@ -54,7 +57,7 @@ def prepare_network(load_network_func: Callable) -> Callable:
     @wraps(load_network_func)
     def wrapper(*args, **kwargs) -> dict[tuple[str, str], nd.MultilayerNetwork]:
         net_dict = load_network_func(*args, **kwargs)
-        print("\tremoving self-loops and isolated nodes")
+        logger.info("Removing self-loops and isolated nodes")
         return {
             (net_type, net_name): _prepare_network(net_graph) for
             (net_type, net_name), net_graph in net_dict.items()

@@ -1,9 +1,12 @@
 import argparse
+import logging
 import yaml
 
 from src.net_generator import ABCDGenerator, MABCDGenerator
 from src.ds_generator import DatasetGenerator
 from src.utils import set_rng_seed
+
+logger = logging.getLogger(__name__)
 
 
 def parse_args(*args):
@@ -25,10 +28,10 @@ if __name__ == "__main__":
     args = parse_args()
     with open(args.config, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
-    print(f"Loaded config: {config}")
+    logger.info("Loaded config: %s", config)
     
     if random_seed := config["run"].get("random_seed"):
-        print(f"Setting randomness seed as {random_seed}!")
+        logger.info("Setting randomness seed as %s", random_seed)
         set_rng_seed(config["run"]["random_seed"])
 
     if (experiment_type := config["run"].get("experiment_type")) == "generate-dataset":
@@ -40,5 +43,5 @@ if __name__ == "__main__":
     else:
         raise ValueError(f"Unknown experiment type {experiment_type}")
 
-    print(f"Inferred experiment type as: {experiment_type}")
+    logger.info("Inferred experiment type as: %s", experiment_type)
     entrypoint(config)

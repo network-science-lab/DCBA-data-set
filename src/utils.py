@@ -3,10 +3,13 @@
 # TODO: review this code and decidee whether it's needed
 
 import datetime
+import logging
 import warnings
 
 import git
 from network_diffusion.utils import fix_random_seed
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 
 warnings.filterwarnings(action="ignore", category=FutureWarning)
