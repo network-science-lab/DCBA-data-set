@@ -1,7 +1,7 @@
 """Python wrapper for ABCDGraphGenerator.jl Julia package."""
 
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -21,14 +21,14 @@ class ABCDConfig:
     c_min: int
     c_max: int
     c_max_iter: int
-    xi: Optional[float] = None
-    mu: Optional[float] = None
+    xi: float | None = None
+    mu: float | None = None
     islocal: bool = False
-    isCL: Optional[bool] = False
-    seed: Optional[int] = None
+    isCL: bool | None = False
+    seed: int | None = None
     nout: int = 0
-    edges_filename: Optional[str] = None
-    communities_filename: Optional[str] = None
+    edges_filename: str | None = None
+    communities_filename: str | None = None
 
     def __post_init__(self) -> None:
         """Validate the configuration parameters."""
@@ -48,7 +48,7 @@ class ABCDConfig:
             raise ValueError("when xi is provided local model is not allowed")
 
     @classmethod
-    def from_yaml(cls, cfg: Dict[str, Any]) -> "ABCDConfig":
+    def from_yaml(cls, cfg: dict[str, Any]) -> "ABCDConfig":
         """Create an instance from a dictionary."""
         return cls(**cfg)
 
@@ -70,7 +70,7 @@ class ABCDGraphGenerator:
             self.install_julia_dependencies()
             jl.seval("using ABCDGraphGenerator")
 
-    def _run(self, c: ABCDConfig) -> Dict[str, Any]:
+    def _run(self, c: ABCDConfig) -> dict[str, Any]:
         """Execute the graph generation process."""
         if c.seed is not None:
             jl.Random.seed_b(c.seed)
@@ -124,7 +124,7 @@ class ABCDGraphGenerator:
             "communities": communities_df,
         }
 
-    def __call__(self, config: ABCDConfig) -> Dict[str, Any]:
+    def __call__(self, config: ABCDConfig) -> dict[str, Any]:
         """Generate a graph based on the provided configuration."""
         result = self._run(config)
         result["edges"].to_csv(config.edges_filename, index=False)

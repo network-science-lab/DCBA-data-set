@@ -26,6 +26,7 @@ class MLNConfig:
     d: int
     edges_filename: str
     communities_filename: str
+    # TODO: the fields below are the full MLNConfig interface exposed by the Julia package.
     # l: int
     # qs: list[float]
     # ns: list[int]

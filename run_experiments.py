@@ -9,6 +9,7 @@ from src.utils import set_rng_seed
 logger = logging.getLogger(__name__)
 
 
+# TODO: consider replacing argparse with hydra for config management
 def parse_args(*args):
     parser = argparse.ArgumentParser()
     parser.add_argument(

@@ -1,12 +1,8 @@
+"""Configuration generator for synthetic graph networks."""
+
 from dataclasses import dataclass, asdict
+
 import yaml
-from pathlib import Path
-
-"""
-Configuration generator for synthetic graph networks.
-Creates config files for the DCBA graph generation framework.
-"""
-
 
 
 @dataclass

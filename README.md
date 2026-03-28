@@ -3,13 +3,6 @@
 This repository contains the DCBA data set along with the necessary code to generate and load
 the data.
 
-## Doodles
-
-- Add DVC remote
-- Add code to load generated data
-
-
-
 ## Runtime Configuration
 
 1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/). `uv` manages the Python
@@ -27,3 +20,12 @@ the data.
    ```bash
    dvc pull
    ```
+
+## Development Notes
+
+- Update the project version in `pyproject.toml`
+
+## Doodles
+
+- Add DVC remote
+- Add code to load generated data
