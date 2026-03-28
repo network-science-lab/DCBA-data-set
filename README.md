@@ -19,10 +19,35 @@ the data.
    ```bash
    uv tool install 'dvc[gdrive]'
    ```
-4. Download the data required for experiments using DVC:
+5. Download the data required for experiments using DVC:
    ```bash
    dvc pull
    ```
+
+## Usage
+
+To run the code execute: `uv run dcba-data-set <path to the configuration file>`. Example configs
+are provided in `scripts/configs/example_generate/`.
+
+There are three functionalities provided by this repository:
+
+### 1. ABCD Generator
+
+Generates a single ABCD graph from a given configuration. Set `experiment_type: "generate-abcd"`
+in the config. See `scripts/configs/example_generate/abcd.yaml` for an example.
+
+### 2. mABCD Generator
+
+Generates a single multilayer mABCD graph from a given configuration. Set
+`experiment_type: "generate-mabcd"` in the config. See
+`scripts/configs/example_generate/mabcd.yaml` for an example.
+
+### 3. Dataset Generator
+
+Samples multiple configurations from provided parameter ranges and generates a network for each.
+Set `experiment_type: "generate-dataset"` in the config. See
+`scripts/configs/example_generate/dataset.yaml` (ABCD) and
+`scripts/configs/example_generate/dataset_mabcd.yaml` (mABCD) for examples.
 
 ## Development Notes
 

@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.scripts]
-dcba-data-set = "dcba_data_set:main"
+dcba-data-set = "dcba_data_set.main:main"
 
 [build-system]
 requires = ["uv_build>=0.9.18,<0.10.0"]

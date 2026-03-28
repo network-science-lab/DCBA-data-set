@@ -25,13 +25,13 @@ def parse_args(*args):
     return parser.parse_args(*args)
 
 
-if __name__ == "__main__":
-
+def main() -> None:
+    """Main entrypoint for the DCBA dataset generator."""
     args = parse_args()
     with open(args.config, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
     logger.info("Loaded config: %s", config)
-    
+
     if random_seed := config["run"].get("random_seed"):
         logger.info("Setting randomness seed as %s", random_seed)
         set_rng_seed(config["run"]["random_seed"])
@@ -47,3 +47,7 @@ if __name__ == "__main__":
 
     logger.info("Inferred experiment type as: %s", experiment_type)
     entrypoint(config)
+
+
+if __name__ == "__main__":
+    main()
