@@ -33,23 +33,6 @@ class mABCDConfig(BaseGraphConfig):
     edges_filename: str
     communities_filename: str
 
-    # TODO: the fields below are the full MLNConfig interface exposed by the Julia package.
-    # They are kept here for reference until a decision is made on whether to expose them.
-    # l: int
-    # qs: list[float]
-    # ns: list[int]
-    # taus: list[float]
-    # rs: list[float]
-    # gammas: list[float]
-    # d_mins: list[int]
-    # d_maxs: list[int]
-    # betas: list[float]
-    # c_mins: list[int]
-    # c_maxs: list[int]
-    # xis: list[float]
-    # skip_edges_correlation: bool
-    # edges_cor_matrix: np.ndarray
-
     def __post_init__(self) -> None:
         self._rng = np.random.default_rng(seed=self.seed)
         assert isinstance(self.n, int)
