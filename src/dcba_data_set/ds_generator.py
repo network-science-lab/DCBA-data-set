@@ -7,9 +7,9 @@ import numpy as np
 import yaml
 from tqdm import tqdm
 
-from src.params_handler import create_out_dir
-from src.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
-from src.julia_ports.abcd import ABCDConfig, ABCDGraphGenerator
+from dcba_data_set.params_handler import create_out_dir
+from dcba_data_set.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
+from dcba_data_set.julia_ports.abcd import ABCDConfig, ABCDGraphGenerator
 
 
 # TODO: update this class to support mABCD whose config shape depends on the number of layers (n).

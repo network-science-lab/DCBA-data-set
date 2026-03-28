@@ -1,3 +1,1 @@
-"""Dataset loader module."""
-
-# TODO: implement this module
+"""DCBA dataset — tools for generating and loading synthetic multilayer networks."""

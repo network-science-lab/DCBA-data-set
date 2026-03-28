@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
-from src.loaders.constants import MLN_ABCD_DATA_PATH
+from dcba_data_set.loaders.constants import MLN_ABCD_DATA_PATH
 
 
 def load_edgelist(edgelist_path: Path) -> nd.MultilayerNetwork:

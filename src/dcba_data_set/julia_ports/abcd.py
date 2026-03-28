@@ -8,7 +8,7 @@ import pandas as pd
 from juliacall import JuliaError
 from juliacall import Main as jl
 
-from src.julia_ports.base import BaseGraphConfig
+from dcba_data_set.julia_ports.base import BaseGraphConfig
 
 
 @dataclass

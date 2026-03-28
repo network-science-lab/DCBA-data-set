@@ -32,4 +32,5 @@ the data.
 
 - Add DVC remote
 - Add code to load generated data
-- for mABCD the dataset generator should be modified to generate n-laytered networks (now it's only hardcoded to 3 amd in fact still doesn't work)
+- for mABCD the dataset generator should be modified to generate n-laytered networks (now it's only
+   hardcoded to 3 amd in fact still doesn't work)

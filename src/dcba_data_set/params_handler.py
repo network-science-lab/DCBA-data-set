@@ -15,8 +15,8 @@ import network_diffusion as nd
 
 logger = logging.getLogger(__name__)
 
-from src.loaders.net_loader import load_network
-from src.loaders.constants import SEPARATOR
+from dcba_data_set.loaders.net_loader import load_network
+from dcba_data_set.loaders.constants import SEPARATOR
 
 
 @dataclass(frozen=True)

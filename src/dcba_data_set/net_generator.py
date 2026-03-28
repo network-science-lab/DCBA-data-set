@@ -6,9 +6,9 @@ import juliacall
 import numpy as np
 from tqdm import tqdm
 
-from src.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
-from src.julia_ports.abcd import ABCDConfig, ABCDGraphGenerator
-from src.params_handler import create_out_dir
+from dcba_data_set.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
+from dcba_data_set.julia_ports.abcd import ABCDConfig, ABCDGraphGenerator
+from dcba_data_set.params_handler import create_out_dir
 
 
 class mABCDGenerator:

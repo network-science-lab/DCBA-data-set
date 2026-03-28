@@ -2,9 +2,9 @@ import argparse
 import logging
 import yaml
 
-from src.net_generator import ABCDGenerator, mABCDGenerator
-from src.ds_generator import DatasetGenerator
-from src.utils import set_rng_seed
+from dcba_data_set.net_generator import ABCDGenerator, mABCDGenerator
+from dcba_data_set.ds_generator import DatasetGenerator
+from dcba_data_set.utils import set_rng_seed
 
 logger = logging.getLogger(__name__)
 
