@@ -8,15 +8,16 @@ import yaml
 from tqdm import tqdm
 
 from src.params_handler import create_out_dir
-from src.julia_ports.mabcd import MLNConfig, MLNABCDGraphGenerator
+from src.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
 from src.julia_ports.abcd import ABCDConfig, ABCDGraphGenerator
 
 
+# TODO: update this class to support mABCD whose config shape depends on the number of layers (n).
 class ConfigGenerator:
 
     def __init__(self, rng_seed: int, cfg_type: Literal["abcd", "mabcd"], max_trials: int) -> None:
         self.rng = np.random.default_rng(seed=rng_seed)
-        self.julia_config = ABCDConfig if cfg_type == "abcd" else MLNConfig
+        self.julia_config = ABCDConfig if cfg_type == "abcd" else mABCDConfig
         self.max_trials = max_trials
 
     def sample_from_range(self, smaller: float | int, bigger: float | int) -> float | int:
@@ -60,7 +61,7 @@ class DatasetGenerator:
         if net_type == "abcd":
             generator = ABCDGraphGenerator
         elif net_type == "mabcd":
-            generator = MLNABCDGraphGenerator
+            generator = mABCDGraphGenerator
         else:
             raise ValueError(f"Unknown network type: {net_type}")
 
@@ -79,7 +80,7 @@ class DatasetGenerator:
 
             sampled_config = cg(net_ranges)
             with open(instance_dir / "config.yaml", "w") as f:
-                yaml.dump(sampled_config, f)
+                yaml.dump(sampled_config.to_yaml(), f)
 
             for replica in range(1, net_replicas + 1):
 

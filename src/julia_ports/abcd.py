@@ -8,11 +8,12 @@ import pandas as pd
 from juliacall import JuliaError
 from juliacall import Main as jl
 
+from src.julia_ports.base import BaseGraphConfig
+
 
 @dataclass
-class ABCDConfig:
+class ABCDConfig(BaseGraphConfig):
     """Configuration for ABCD graph generation."""
-    n: int
     t1: float
     d_min: int
     d_max: int
@@ -51,6 +52,28 @@ class ABCDConfig:
     def from_yaml(cls, cfg: dict[str, Any]) -> "ABCDConfig":
         """Create an instance from a dictionary."""
         return cls(**cfg)
+
+    def to_yaml(self) -> dict[str, Any]:
+        """Convert configuration into a serialisable format."""
+        return {
+            "n": self.n,
+            "t1": self.t1,
+            "d_min": self.d_min,
+            "d_max": self.d_max,
+            "d_max_iter": self.d_max_iter,
+            "t2": self.t2,
+            "c_min": self.c_min,
+            "c_max": self.c_max,
+            "c_max_iter": self.c_max_iter,
+            "xi": self.xi,
+            "mu": self.mu,
+            "islocal": self.islocal,
+            "isCL": self.isCL,
+            "seed": self.seed,
+            "nout": self.nout,
+            "edges_filename": self.edges_filename,
+            "communities_filename": self.communities_filename,
+        }
 
 
 class ABCDGraphGenerator:

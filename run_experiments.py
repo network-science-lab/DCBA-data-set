@@ -2,7 +2,7 @@ import argparse
 import logging
 import yaml
 
-from src.net_generator import ABCDGenerator, MABCDGenerator
+from src.net_generator import ABCDGenerator, mABCDGenerator
 from src.ds_generator import DatasetGenerator
 from src.utils import set_rng_seed
 
@@ -19,7 +19,8 @@ def parse_args(*args):
         type=str,
         # default="scripts/configs/example_generate/mabcd.yaml",
         # default="scripts/configs/example_generate/abcd.yaml",
-        default="scripts/configs/example_generate/dataset.yaml",
+        default="scripts/configs/example_generate/dataset-abcd.yaml",
+        # default="scripts/configs/example_generate/dataset-mabcd.yaml",
     )
     return parser.parse_args(*args)
 
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     if (experiment_type := config["run"].get("experiment_type")) == "generate-dataset":
         entrypoint = DatasetGenerator()
     elif experiment_type == "generate-mabcd":
-        entrypoint = MABCDGenerator()
+        entrypoint = mABCDGenerator()
     elif experiment_type == "generate-abcd":
         entrypoint = ABCDGenerator()
     else:

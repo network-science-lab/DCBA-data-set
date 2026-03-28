@@ -6,16 +6,16 @@ import juliacall
 import numpy as np
 from tqdm import tqdm
 
-from src.julia_ports.mabcd import MLNConfig, MLNABCDGraphGenerator
+from src.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
 from src.julia_ports.abcd import ABCDConfig, ABCDGraphGenerator
 from src.params_handler import create_out_dir
 
 
-class MABCDGenerator:
+class mABCDGenerator:
     """Wrapper for the MABCD graph generator runnable from CLI."""
 
-    julia_class = MLNABCDGraphGenerator
-    julia_config = MLNConfig
+    julia_class = mABCDGraphGenerator
+    julia_config = mABCDConfig
 
     def run_experiments(self, config: dict[str, Any]) -> None:
 
@@ -38,7 +38,7 @@ class MABCDGenerator:
         return self.run_experiments(config)
     
 
-class ABCDGenerator(MABCDGenerator):
+class ABCDGenerator(mABCDGenerator):
     """Wrapper for the ABCD graph generator runnable from CLI."""
 
     julia_class = ABCDGraphGenerator

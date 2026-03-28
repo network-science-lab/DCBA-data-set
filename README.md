@@ -11,12 +11,15 @@ the data.
    ```bash
    uv sync
    ```
-3. Use `uv shell` to enter the project environment, or prefix commands with `uv run`.
+3. Resolve Julia dependencies (required on first setup):
+   ```bash
+   uv run python -c "import juliapkg; juliapkg.resolve(force=True)"
+   ```
 4. Additionally, to use DVC with Google Drive as remote storage, install:
    ```bash
    uv tool install 'dvc[gdrive]'
    ```
-5. Download the data required for experiments using DVC:
+4. Download the data required for experiments using DVC:
    ```bash
    dvc pull
    ```
@@ -29,3 +32,4 @@ the data.
 
 - Add DVC remote
 - Add code to load generated data
+- for mABCD the dataset generator should be modified to generate n-laytered networks (now it's only hardcoded to 3 amd in fact still doesn't work)
