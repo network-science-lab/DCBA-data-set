@@ -1,7 +1,6 @@
 """A Python wrapper to the MLNABCDGraphGenerator Julia package."""
 
 import tempfile
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -9,11 +8,11 @@ import numpy as np
 import pandas as pd
 from juliacall import JuliaError
 from juliacall import Main as jl
+from pydantic import ConfigDict, PrivateAttr
 
 from dcba_data_set.julia_ports.base import BaseGraphConfig
 
 
-@dataclass
 class mABCDConfig(BaseGraphConfig):
     """
     A wrapper for jl.MLNABCDGraphGenerator.MLNConfig.
@@ -21,6 +20,10 @@ class mABCDConfig(BaseGraphConfig):
     Note that layer_params stores raw normalised values (0-1 range). Conversion
     to Julia's format is deferred to to_julia_csvs(), called during generation.
     """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    _rng: np.random.Generator = PrivateAttr()
 
     seed: int | None
     edges_cor: pd.DataFrame
@@ -33,18 +36,8 @@ class mABCDConfig(BaseGraphConfig):
     edges_filename: str
     communities_filename: str
 
-    def __post_init__(self) -> None:
+    def model_post_init(self, __context: Any) -> None:
         self._rng = np.random.default_rng(seed=self.seed)
-        assert isinstance(self.n, int)
-        assert isinstance(self.edges_cor, pd.DataFrame)
-        assert isinstance(self.layer_params, pd.DataFrame)
-        assert isinstance(self.d_max_iter, int)
-        assert isinstance(self.c_max_iter, int)
-        assert isinstance(self.t, int)
-        assert isinstance(self.d, int)
-        assert isinstance(self.eps, float)
-        assert isinstance(self.edges_filename, str)
-        assert isinstance(self.communities_filename, str)
 
     def _lp_yaml_helper(self) -> dict[str, Any]:
         return {

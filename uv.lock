@@ -537,6 +537,7 @@ dependencies = [
     { name = "networkx" },
     { name = "numpy" },
     { name = "pandas" },
+    { name = "pydantic" },
     { name = "pyyaml" },
     { name = "tqdm" },
 ]
@@ -551,6 +552,7 @@ requires-dist = [
     { name = "networkx", specifier = ">=3.6.1" },
     { name = "numpy", specifier = "~=2.0.0" },
     { name = "pandas", specifier = "~=2.2.3" },
+    { name = "pydantic", specifier = ">=2.0" },
     { name = "pyyaml", specifier = "~=6.0.1" },
     { name = "tqdm", specifier = "~=4.66.4" },
 ]

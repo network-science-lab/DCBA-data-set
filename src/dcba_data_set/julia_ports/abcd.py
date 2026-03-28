@@ -1,19 +1,19 @@
 """Python wrapper for ABCDGraphGenerator.jl Julia package."""
 
-from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 import pandas as pd
 from juliacall import JuliaError
 from juliacall import Main as jl
+from pydantic import model_validator
 
 from dcba_data_set.julia_ports.base import BaseGraphConfig
 
 
-@dataclass
 class ABCDConfig(BaseGraphConfig):
     """Configuration for ABCD graph generation."""
+
     t1: float
     d_min: int
     d_max: int
@@ -31,8 +31,8 @@ class ABCDConfig(BaseGraphConfig):
     edges_filename: str | None = None
     communities_filename: str | None = None
 
-    def __post_init__(self) -> None:
-        """Validate the configuration parameters."""
+    @model_validator(mode="after")
+    def _validate(self) -> "ABCDConfig":
         if self.mu is not None and self.xi is not None:
             raise ValueError("inconsistent data: only μ or ξ may be provided")
         if self.mu is not None and self.nout > 0:
@@ -47,6 +47,7 @@ class ABCDConfig(BaseGraphConfig):
             raise ValueError("c_max cannot be larger than graph size")
         if self.xi and self.islocal:
             raise ValueError("when xi is provided local model is not allowed")
+        return self
 
     @classmethod
     def from_yaml(cls, cfg: dict[str, Any]) -> "ABCDConfig":
