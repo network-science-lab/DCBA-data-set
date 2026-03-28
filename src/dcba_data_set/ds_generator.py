@@ -1,11 +1,15 @@
 """Module to generate datasets based on specified configurations."""
 
+import json
+import logging
 import uuid
 from typing import Any, Literal
 
 import numpy as np
 import yaml
 from tqdm import tqdm
+
+logger = logging.getLogger(__name__)
 
 from dcba_data_set.params_handler import create_out_dir
 from dcba_data_set.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
@@ -36,15 +40,13 @@ class ConfigGenerator:
         return sampled_config
 
     def __call__(self, config_ranges: dict[str, Any]) -> Any:
-        trial_nbr = 1
-        while trial_nbr < self.max_trials:
+        for trial in range(1, self.max_trials + 1):
             sampled_config_dict = self._draw_config(config_ranges)
             try:
-                sampled_config = self.julia_config.from_yaml(sampled_config_dict)
-                return sampled_config
+                return self.julia_config.from_yaml(sampled_config_dict)
             except Exception as e:
-                trial_nbr += 1
-        raise RuntimeError("Max trials exceeded while sampling a valid configuration.")
+                logger.warning("Trial %d/%d failed: %s", trial, self.max_trials, e)
+        raise RuntimeError(f"Exceeded {self.max_trials} trials without a valid configuration.")
 
 
 class DatasetGenerator:
@@ -71,21 +73,68 @@ class DatasetGenerator:
             max_trials=max_trials
         )
 
+        report = {"net_type": net_type, "instances": []}
+
         p_bar = tqdm(np.arange(instances), desc="", leave=False, colour="green")
         for instance in p_bar:
             p_bar.set_description_str("Instance")
 
-            instance_dir = out_dir / str(uuid.uuid4())[:8]
+            instance_id = str(uuid.uuid4())[:8]
+            instance_dir = out_dir / instance_id
             instance_dir.mkdir(parents=True, exist_ok=True)
 
-            sampled_config = cg(net_ranges)
+            try:
+                sampled_config = cg(net_ranges)
+            except RuntimeError as e:
+                logger.error("Skipping instance %d — %s", instance, e)
+                instance_dir.rmdir()
+                report["instances"].append(
+                    {"id": instance_id, "status": "skipped", "error": str(e), "replicas": []}
+                )
+                continue
+
             with open(instance_dir / "config.yaml", "w") as f:
                 yaml.dump(sampled_config.to_yaml(), f)
 
+            instance_record = {
+                "id": instance_id,
+                "config": f"{instance_id}/config.yaml",
+                "replicas": [],
+            }
+
             for replica in range(1, net_replicas + 1):
 
+                edges_rel = f"{instance_id}/edges_{replica}.dat"
+                communities_rel = f"{instance_id}/communities_{replica}.dat"
                 sampled_config.edges_filename = str(instance_dir / f"edges_{replica}.dat")
                 sampled_config.communities_filename = str(instance_dir / f"communities_{replica}.dat")
                 sampled_config.seed = config["run"]["rng_seed"]
 
-                generator()(sampled_config)
+                try:
+                    generator()(sampled_config)
+                    instance_record["replicas"].append(
+                        {
+                            "replica": replica,
+                            "edges": edges_rel,
+                            "communities": communities_rel,
+                            "ok": True,
+                        }
+                    )
+                except Exception as e:
+                    logger.error(
+                        "Instance %d replica %d failed during generation: %s", instance, replica, e
+                    )
+                    instance_record["replicas"].append(
+                        {
+                            "replica": replica,
+                            "edges": edges_rel,
+                            "communities": communities_rel,
+                            "ok": False,
+                            "error": str(e),
+                        }
+                    )
+
+            report["instances"].append(instance_record)
+
+        with open(out_dir / "report.json", "w") as f:
+            json.dump(report, f, indent=2)
