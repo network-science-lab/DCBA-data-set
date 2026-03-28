@@ -1,0 +1,29 @@
+[project]
+name = "dcba-data-set"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Michał Czuba", email = "michal.czuba@pwr.edu.pl" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "dvc>=3.66.1",
+    "dvc-gdrive>=3.0.1",
+    "gitpython>=3.1.46",
+    "juliacall~=0.9.24",
+    "network-diffusion==0.18.0rc20250314172729",
+    "networkx>=3.6.1",
+    "numpy~=2.0.0",
+    "pandas~=2.2.3",
+    "pydantic>=2.0",
+    "pyyaml~=6.0.1",
+    "tqdm~=4.66.4",
+]
+
+[project.scripts]
+dcba-data-set = "dcba_data_set.main:main"
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
