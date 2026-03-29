@@ -30,6 +30,20 @@ dcba-data-set = "dcba_data_set.main:main"
 requires = ["uv_build>=0.9.18,<0.10.0"]
 build-backend = "uv_build"
 
+[tool.pytest.ini_options]
+# Suppress known third-party warnings that cannot be fixed in this codebase:
+# - torch_geometric 2.7.0 bug: llm/utils/backend_utils.py still imports from
+#   torch_geometric.distributed, which emits a deprecation warning since 2.7.0.
+#   No newer release is available to upgrade to.
+# - Vendor torch build nv24.4 (≈2.3.x) uses deprecated ast.Str / ast.Attribute.s
+#   AST APIs in torch/jit/frontend.py. Fixed upstream in torch 2.4+, but this
+#   environment uses a pinned NVIDIA build that cannot be replaced.
+filterwarnings = [
+    "ignore:.*torch_geometric\\.distributed.*has been deprecated:DeprecationWarning",
+    "ignore:ast\\.Str is deprecated:DeprecationWarning:torch\\.jit\\.frontend",
+    "ignore:Attribute s is deprecated:DeprecationWarning:torch\\.jit\\.frontend",
+]
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
