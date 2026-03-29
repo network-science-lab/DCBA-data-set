@@ -23,6 +23,10 @@ data.
    ```bash
    dvc pull
    ```
+6. Install `pre-commit`:
+   ```bash
+   uv run pre-commit install --config .pre-commit-config.yaml
+   ```
 
 ## Usage
 
@@ -48,10 +52,6 @@ Samples multiple configurations from provided parameter ranges and generates a n
 `experiment_type: "generate-dataset"` in the config. See
 `scripts/configs/example_generate/dataset.yaml` (ABCD) and
 `scripts/configs/example_generate/dataset_mabcd.yaml` (mABCD) for examples.
-
-## Development Notes
-
-- Update the project version in `pyproject.toml`
 
 ## Doodles
 
