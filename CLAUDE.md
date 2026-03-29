@@ -1,31 +1,37 @@
 # Claude Code rules for DCBA-data-set
 
 ## Project overview
-Generates synthetic multilayer graphs via ABCD/mABCD (Julia-backed) and provides
-primitive data loading primitives for CLIP-style training.  The companion training
-repository lives at `../infmax-trainer-icm-mln/`.
+
+Generates synthetic multilayer graphs via ABCD/mABCD (Julia-backed) and provides primitive data
+loading primitives for CLIP-style training. The companion training repository lives at
+`../infmax-trainer-icm-mln/`.
 
 ## Environment
-- Package manager: **uv**.  Use `uv add <pkg>` to install packages and
-  `uv run <cmd>` to execute project scripts.  Never use pip directly.
+
+- Package manager: **uv**. Use `uv add <pkg>` to install packages and `uv run <cmd>` to execute
+  project scripts. Never use pip directly.
 - Python entry point: `uv run dcba-data-set <config.yaml>`
 
 ## Language
+
 - Use **British English** in all text: comments, docstrings, commit messages, and documentation.
 
 ## Code style
+
 - Line length: **100 characters**.
 - Type hints are required on every function signature (arguments and return type).
 - Docstring style: **reStructuredText** (`:param x:`, `:returns:`, `:raises:`).
 - Prefer `pathlib.Path` over bare strings for all file-system paths.
 
 ## Version management
-- When starting work on a new branch, bump `version` in `pyproject.toml` before
-  making other changes.
+
+- When starting work on a new branch, bump `version` in `pyproject.toml` before making other
+  changes.
 
 ## Git workflow
+
 - When moving files use `git mv`, not bare `mv`.
 - Test code before every commit — do not commit changes that are known to be broken.
-- If pre-commit is installed (`pre-commit` in PATH or `.pre-commit-config.yaml` exists),
-  run `pre-commit run --files <changed files>` before committing.
+- If pre-commit is installed (`pre-commit` in PATH or `.pre-commit-config.yaml` exists), run
+  `pre-commit run --files <changed files>` before committing.
 - Commit messages: short imperative subject line, no co-authorship trailers.
