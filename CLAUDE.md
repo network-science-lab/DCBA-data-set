@@ -19,7 +19,9 @@ loading primitives for further training tasks (see the `../DCBA/` repository).
 
 - Line length: **100 characters**.
 - Type hints are required on every function signature (arguments and return type).
-- Docstring style: **reStructuredText** (`:param x:`, `:returns:`, `:raises:`).
+- Docstring style: **reStructuredText** using standard Sphinx field directives only: `:param x:`,
+  `:type x:`, `:returns:`, `:rtype:`, `:raises ExcType:`. For class attribute documentation use
+  plain prose — do **not** use `:ivar:`.
 - Prefer `pathlib.Path` over bare strings for all file-system paths.
 - Prefer placing text in new line (i.e., \n after """) if docstring cannot fit in one line.
 

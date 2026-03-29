@@ -1,4 +1,4 @@
-"""Loader for ABCD datasets produced by DatasetGenerator."""
+"""Loader for mABCD datasets produced by DatasetGenerator."""
 
 import json
 import logging
@@ -11,20 +11,17 @@ from dcba_data_set.loaders.data_models import ConfigRecord, DCBAHeteroData
 logger = logging.getLogger(__name__)
 
 
-def load_abcd_report(
+def load_mabcd_report(
     report_path: Path,
 ) -> tuple[dict[str, ConfigRecord], list[DCBAHeteroData]]:
-    """Load an ABCD dataset from a ``report.json`` manifest.
+    """Load an mABCD dataset from a ``report.json`` manifest.
 
     Each replica of each instance becomes one :class:`DCBAHeteroData` object.
     Replicas marked ``"ok": false`` in the report are skipped with a warning.
 
-    Args:
-        report_path: Path to the ``report.json`` file written by
-            :class:`~dcba_data_set.ds_generator.DatasetGenerator`.
-
-    Returns:
-        A tuple ``(configs, graphs)`` where:
+    :param report_path: Path to the ``report.json`` file written by
+        :class:`~dcba_data_set.ds_generator.DatasetGenerator`.
+    :returns: A tuple ``(configs, graphs)`` where:
 
         - ``configs`` maps ``instance_id → ConfigRecord`` (one entry per instance).
         - ``graphs`` is a flat list of :class:`DCBAHeteroData` objects, one per
@@ -64,7 +61,7 @@ def load_abcd_report(
             edges_path = root / replica_entry["edges"]
             communities_path = root / replica_entry["communities"]
 
-            graph = DCBAHeteroData.from_abcd_files(
+            graph = DCBAHeteroData.from_mabcd_files(
                 edges_path=edges_path,
                 communities_path=communities_path,
                 instance_id=instance_id,
