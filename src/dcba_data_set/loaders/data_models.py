@@ -107,9 +107,7 @@ class DCBAHeteroData(HeteroData):
         for l_idx, (comm_path, _) in enumerate(communities_paths):
             df = pd.read_csv(comm_path)
             actor_indices = df["node"].astype(str).map(actors_map.get).values
-            community[actor_indices, l_idx] = torch.tensor(
-                df["community"].values, dtype=torch.long
-            )
+            community[actor_indices, l_idx] = torch.tensor(df["community"].values, dtype=torch.long)
         data["actor"].community = community
 
         data.instance_id = instance_id
