@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-
 MLN_ABCD_DATA_PATH = Path(__file__).parent.parent.parent / "data/nets_generated"
 
 SEPARATOR = "^"

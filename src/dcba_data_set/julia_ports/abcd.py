@@ -4,8 +4,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from juliacall import JuliaError
-from juliacall import Main as jl
+from juliacall import JuliaError, Main as jl
 from pydantic import model_validator
 
 from dcba_data_set.julia_ports.base import BaseGraphConfig

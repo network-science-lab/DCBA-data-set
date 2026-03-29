@@ -11,4 +11,5 @@ warnings.filterwarnings(action="ignore", category=FutureWarning)
 
 
 def set_rng_seed(seed: int) -> None:
+    """Set the global random seed for reproducible runs."""
     fix_random_seed(seed=seed)  # TODO: use it directly from nd once new version is released

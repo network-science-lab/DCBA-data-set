@@ -9,17 +9,19 @@ import numpy as np
 import yaml
 from tqdm import tqdm
 
-logger = logging.getLogger(__name__)
-
-from dcba_data_set.params_handler import create_out_dir
-from dcba_data_set.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
 from dcba_data_set.julia_ports.abcd import ABCDConfig, ABCDGraphGenerator
+from dcba_data_set.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
+from dcba_data_set.params_handler import create_out_dir
+
+logger = logging.getLogger(__name__)
 
 
 # TODO: update this class to support mABCD whose config shape depends on the number of layers (n).
 class ConfigGenerator:
+    """Sample valid graph configurations from parameter ranges."""
 
     def __init__(self, rng_seed: int, cfg_type: Literal["abcd", "mabcd"], max_trials: int) -> None:
+        """Initialise the generator with a random seed, config type, and retry limit."""
         self.rng = np.random.default_rng(seed=rng_seed)
         self.julia_config = ABCDConfig if cfg_type == "abcd" else mABCDConfig
         self.max_trials = max_trials
@@ -40,6 +42,10 @@ class ConfigGenerator:
         return sampled_config
 
     def __call__(self, config_ranges: dict[str, Any]) -> Any:
+        """Sample a valid config, retrying up to ``max_trials`` times.
+
+        :raises RuntimeError: If no valid configuration is found within the trial limit.
+        """
         for trial in range(1, self.max_trials + 1):
             sampled_config_dict = self._draw_config(config_ranges)
             try:
@@ -50,9 +56,10 @@ class ConfigGenerator:
 
 
 class DatasetGenerator:
+    """Generate a dataset of graphs by sampling configurations and running the graph generator."""
 
     def __call__(self, config: dict[str, Any]) -> Any:
-        
+        """Run the dataset generation loop and write outputs and a report to ``out_dir``."""
         net_ranges = config["net_ranges"]
         net_type = config["generator"]["net_type"]
         net_replicas = config["generator"]["replicas"]
@@ -68,9 +75,7 @@ class DatasetGenerator:
             raise ValueError(f"Unknown network type: {net_type}")
 
         cg = ConfigGenerator(
-            rng_seed=config["run"]["rng_seed"],
-            cfg_type=net_type,
-            max_trials=max_trials
+            rng_seed=config["run"]["rng_seed"], cfg_type=net_type, max_trials=max_trials
         )
 
         report = {"net_type": net_type, "instances": []}
@@ -103,11 +108,12 @@ class DatasetGenerator:
             }
 
             for replica in range(1, net_replicas + 1):
-
                 edges_rel = f"{instance_id}/edges_{replica}.dat"
                 communities_rel = f"{instance_id}/communities_{replica}.dat"
                 sampled_config.edges_filename = str(instance_dir / f"edges_{replica}.dat")
-                sampled_config.communities_filename = str(instance_dir / f"communities_{replica}.dat")
+                sampled_config.communities_filename = str(
+                    instance_dir / f"communities_{replica}.dat"
+                )
                 sampled_config.seed = config["run"]["rng_seed"]
 
                 try:

@@ -6,8 +6,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from juliacall import JuliaError
-from juliacall import Main as jl
+from juliacall import JuliaError, Main as jl
 from pydantic import ConfigDict, PrivateAttr
 
 from dcba_data_set.julia_ports.base import BaseGraphConfig
@@ -37,13 +36,11 @@ class mABCDConfig(BaseGraphConfig):
     communities_filename: str
 
     def model_post_init(self, __context: Any) -> None:
+        """Initialise the internal RNG after pydantic validation."""
         self._rng = np.random.default_rng(seed=self.seed)
 
     def _lp_yaml_helper(self) -> dict[str, Any]:
-        return {
-            col: list(self.layer_params[col])
-            for col in self.layer_params.columns
-        }
+        return {col: list(self.layer_params[col]) for col in self.layer_params.columns}
 
     def to_yaml(self) -> dict[str, Any]:
         """Convert configuration into a serialisable format."""
@@ -124,10 +121,12 @@ class mABCDGraphGenerator:
 
     @staticmethod
     def install_julia_dependencies() -> None:
+        """Install the Julia packages required for mABCD graph generation."""
         jl.Pkg.add(url="https://github.com/bkamins/ABCDGraphGenerator.jl")
         jl.Pkg.add(url="https://github.com/KrainskiL/MLNABCDGraphGenerator.jl")
 
     def __call__(self, config: mABCDConfig) -> None:
+        """Generate a multilayer ABCD graph from ``config`` and write edge/community files."""
         try:
             jl.seval("using MLNABCDGraphGenerator")
         except JuliaError:
@@ -138,7 +137,6 @@ class mABCDGraphGenerator:
         jl.redirect_stdout(jl.devnull)
 
         with tempfile.TemporaryDirectory() as tmpdir:
-
             # Save dataframes into temp dir in Julia-compatible format
             edges_path = str(Path(tmpdir) / self.edges_filename)
             layers_path = str(Path(tmpdir) / self.layers_filename)
@@ -174,7 +172,9 @@ class mABCDGraphGenerator:
 
             # Map nodes and communities into agents
             edges = jl.MLNABCDGraphGenerator.map_edges_to_agents(edges, active_nodes)
-            coms = jl.MLNABCDGraphGenerator.map_communities_to_agents(jl_config.n, coms, active_nodes)
+            coms = jl.MLNABCDGraphGenerator.map_communities_to_agents(
+                jl_config.n, coms, active_nodes
+            )
 
             # Adjust edges correlation
             edges_rewired = jl.MLNABCDGraphGenerator.adjust_edges_correlation(
@@ -189,7 +189,6 @@ class mABCDGraphGenerator:
 
 
 if __name__ == "__main__":
-
     import yaml
 
     out_dir = Path("./examples/generate-mabcd")

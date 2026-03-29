@@ -2,12 +2,11 @@
 
 from typing import Any
 
-import juliacall
 import numpy as np
 from tqdm import tqdm
 
-from dcba_data_set.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
 from dcba_data_set.julia_ports.abcd import ABCDConfig, ABCDGraphGenerator
+from dcba_data_set.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
 from dcba_data_set.params_handler import create_out_dir
 
 
@@ -18,7 +17,7 @@ class mABCDGenerator:
     julia_config = mABCDConfig
 
     def run_experiments(self, config: dict[str, Any]) -> None:
-
+        """Run repeated graph generation experiments and write outputs to ``out_dir``."""
         _net_config = config["net_config"]
         _net_config["seed"] = config["run"]["rng_seed"]
         net_config = self.julia_config.from_yaml(_net_config)
@@ -35,8 +34,9 @@ class mABCDGenerator:
             self.julia_class()(config=net_config)
 
     def __call__(self, config: dict[str, Any]) -> None:
+        """Delegate to :meth:`run_experiments`."""
         return self.run_experiments(config)
-    
+
 
 class ABCDGenerator(mABCDGenerator):
     """Wrapper for the ABCD graph generator runnable from CLI."""
