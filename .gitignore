@@ -7,3 +7,4 @@
 .venv
 examples
 PLAN.md
+data/test/*

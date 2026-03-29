@@ -59,3 +59,10 @@ Samples multiple configurations from provided parameter ranges and generates a n
 - Add code to load generated data
 - for mABCD the dataset generator should be modified to generate n-laytered networks (now it's only
   hardcoded to 3 amd in fact still doesn't work)
+- Community IDs in `DCBAHeteroData` currently store raw values from the generation files. Two
+  encoding alternatives worth exploring:
+  - Option A (partial invariance): canonically reindex IDs per layer by descending community size,
+    so ID 0 is always the largest community.
+  - Option B (full invariance): replace IDs with per-node statistics (community_size, intra_degree)
+    per layer — shape `[num_actors, 2, num_layers]`. Fully invariant by construction; directly
+    mirrors ABCD parameters like xi/mu.
