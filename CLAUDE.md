@@ -22,6 +22,7 @@ loading primitives for CLIP-style training. The companion training repository li
 - Type hints are required on every function signature (arguments and return type).
 - Docstring style: **reStructuredText** (`:param x:`, `:returns:`, `:raises:`).
 - Prefer `pathlib.Path` over bare strings for all file-system paths.
+- Prefer placing text in new line (i.e., \n after """) if docstring cannot fit in one line.
 
 ## Version management
 
