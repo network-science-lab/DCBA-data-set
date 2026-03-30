@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from dcba_data_set.julia_ports.abcd import ABCDConfig, ABCDGraphGenerator
 from dcba_data_set.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
-from dcba_data_set.params_handler import create_out_dir
+from dcba_data_set.utils import create_out_dir
 
 logger = logging.getLogger(__name__)
 
