@@ -1,4 +1,4 @@
-"""Loader for ABCD datasets produced by DatasetGenerator."""
+"""Unified loader for ABCD and mABCD datasets produced by DatasetGenerator."""
 
 import json
 import logging
@@ -10,31 +10,42 @@ from dcba_data_set.loaders.data_models import ConfigRecord, DCBAHeteroData
 
 logger = logging.getLogger(__name__)
 
+_FACTORY = {
+    "abcd": DCBAHeteroData.from_abcd_files,
+    "mabcd": DCBAHeteroData.from_mabcd_files,
+}
 
-def load_abcd_report(
+
+def load_report(
     report_path: Path,
 ) -> tuple[dict[str, ConfigRecord], list[DCBAHeteroData]]:
-    """Load an ABCD dataset from a ``report.json`` manifest.
+    """
+    Load an ABCD or mABCD dataset from a ``report.json`` manifest.
 
-    Each replica of each instance becomes one :class:`DCBAHeteroData` object.
-    Replicas marked ``"ok": false`` in the report are skipped with a warning.
+    The graph type is determined by the ``net_type`` field in the manifest
+    (``"abcd"`` or ``"mabcd"``). Each replica of each instance becomes one
+    :class:`DCBAHeteroData` object. Replicas marked ``"ok": false`` are skipped
+    with a warning.
 
-    Args:
-        report_path: Path to the ``report.json`` file written by
-            :class:`~dcba_data_set.ds_generator.DatasetGenerator`.
-
-    Returns:
-        A tuple ``(configs, graphs)`` where:
+    :param report_path: Path to the ``report.json`` file written by
+        :class:`~dcba_data_set.ds_generator.DatasetGenerator`.
+    :returns: A tuple ``(configs, graphs)`` where:
 
         - ``configs`` maps ``instance_id → ConfigRecord`` (one entry per instance).
         - ``graphs`` is a flat list of :class:`DCBAHeteroData` objects, one per
           successful replica across all instances.
+    :raises ValueError: If the ``net_type`` field in the manifest is not recognised.
     """
     report_path = Path(report_path)
     root = report_path.parent
 
     with report_path.open() as f:
         report = json.load(f)
+
+    net_type: str = report["net_type"]
+    if net_type not in _FACTORY:
+        raise ValueError(f"Unknown net_type {net_type!r} in {report_path}.")
+    factory = _FACTORY[net_type]
 
     configs: dict[str, ConfigRecord] = {}
     graphs: list[DCBAHeteroData] = []
@@ -64,7 +75,7 @@ def load_abcd_report(
             edges_path = root / replica_entry["edges"]
             communities_path = root / replica_entry["communities"]
 
-            graph = DCBAHeteroData.from_abcd_files(
+            graph = factory(
                 edges_path=edges_path,
                 communities_path=communities_path,
                 instance_id=instance_id,

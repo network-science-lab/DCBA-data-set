@@ -1,12 +1,13 @@
 """E2E tests for ABCD and mABCD data loaders."""
 
+import json
 from pathlib import Path
 
 import pytest
 import torch
 from bidict import bidict
 
-from dcba_data_set.loaders import ConfigRecord, DCBAHeteroData, load_abcd_report, load_mabcd_report
+from dcba_data_set.loaders import ConfigRecord, DCBAHeteroData, load_report
 
 DATA_ROOT = Path(__file__).parent.parent / "data" / "test"
 ABCD_REPORT = DATA_ROOT / "dataset_abcd" / "report.json"
@@ -16,17 +17,25 @@ MABCD_REPORT = DATA_ROOT / "dataset_mabcd" / "report.json"
 @pytest.fixture(scope="module")
 def abcd_dataset() -> tuple[dict[str, ConfigRecord], list[DCBAHeteroData]]:
     """Load the ABCD test dataset once for the entire module."""
-    return load_abcd_report(ABCD_REPORT)
+    return load_report(ABCD_REPORT)
 
 
 @pytest.fixture(scope="module")
 def mabcd_dataset() -> tuple[dict[str, ConfigRecord], list[DCBAHeteroData]]:
     """Load the mABCD test dataset once for the entire module."""
-    return load_mabcd_report(MABCD_REPORT)
+    return load_report(MABCD_REPORT)
+
+
+def test_unknown_net_type(tmp_path: Path) -> None:
+    """load_report raises ValueError for an unrecognised net_type."""
+    report_file = tmp_path / "report.json"
+    report_file.write_text(json.dumps({"net_type": "unknown_type", "instances": []}))
+    with pytest.raises(ValueError, match="unknown_type"):
+        load_report(report_file)
 
 
 class TestLoadAbcdReport:
-    """Tests for load_abcd_report against the test dataset."""
+    """Tests for load_report against the ABCD test dataset."""
 
     def test_counts(self, abcd_dataset: tuple) -> None:
         """Loader returns one config per instance and one graph per replica."""
@@ -89,7 +98,7 @@ class TestLoadAbcdReport:
 
 
 class TestLoadMabcdReport:
-    """Tests for load_mabcd_report against the test dataset."""
+    """Tests for load_report against the mABCD test dataset."""
 
     def test_counts(self, mabcd_dataset: tuple) -> None:
         """Loader returns one config per instance and one graph per replica."""
