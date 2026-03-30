@@ -1,4 +1,4 @@
-"""E2E tests for ABCD and mABCD data loaders."""
+"""E2E tests for ABCD and mABCD graph I/O."""
 
 import json
 from pathlib import Path
@@ -7,7 +7,7 @@ import pytest
 import torch
 from bidict import bidict
 
-from dcba_data_set.loaders import ConfigRecord, DCBAHeteroData, load_report
+from dcba_data_set.graph_io import ConfigRecord, DCBAHeteroData, load_report
 
 DATA_ROOT = Path(__file__).parent.parent / "data" / "test"
 ABCD_REPORT = DATA_ROOT / "dataset_abcd" / "report.json"

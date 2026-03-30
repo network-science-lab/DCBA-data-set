@@ -6,7 +6,7 @@ from pathlib import Path
 
 import yaml
 
-from dcba_data_set.loaders.data_models import ConfigRecord, DCBAHeteroData
+from dcba_data_set.graph_io.data_models import ConfigRecord, DCBAHeteroData
 
 logger = logging.getLogger(__name__)
 
