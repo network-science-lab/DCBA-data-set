@@ -5,7 +5,7 @@ run:
 # TODO - this should be further modified to draw n-layered networks!
 net_ranges:
   n: [500, 3000]
-  seed: null  # placeholder, overwritten by DatasetGenerator
+  seed: null # placeholder, overwritten by DatasetGenerator
   edges_cor:
     - [1.0, 0.25, 0.10]
     - [0.25, 1.0, 0.30]
@@ -31,9 +31,9 @@ net_ranges:
 
 generator:
   net_type: "mabcd"
-  replicas: 5  # number of networks to generate from the given configuration
-  instances: 10  # number of valid configurations to use
-  max_trials: 3  # maximum number of trials to sample a valid configuration
-  out_dir: "./examples/generate_dataset-mabcd"  # directory to save data in
+  replicas: 5 # number of networks to generate from the given configuration
+  instances: 10 # number of valid configurations to use
+  max_trials: 3 # maximum number of trials to sample a valid configuration
+  out_dir: "./examples/generate_dataset-mabcd" # directory to save data in
 
 # Total number of generated networks is replicas * instances

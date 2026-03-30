@@ -1,16 +1,20 @@
+"""Entry point for the DCBA dataset generator CLI."""
+
 import argparse
 import logging
+
 import yaml
 
-from dcba_data_set.net_generator import ABCDGenerator, mABCDGenerator
 from dcba_data_set.ds_generator import DatasetGenerator
+from dcba_data_set.net_generator import ABCDGenerator, mABCDGenerator
 from dcba_data_set.utils import set_rng_seed
 
 logger = logging.getLogger(__name__)
 
 
 # TODO: consider replacing argparse with hydra for config management
-def parse_args(*args):
+def parse_args(*args: str) -> argparse.Namespace:
+    """Parse CLI arguments and return the populated namespace."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "config",
@@ -26,7 +30,7 @@ def parse_args(*args):
 
 
 def main() -> None:
-    """Main entrypoint for the DCBA dataset generator."""
+    """Run the DCBA dataset generator."""
     args = parse_args()
     with open(args.config, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)

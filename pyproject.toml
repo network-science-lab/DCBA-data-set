@@ -1,10 +1,10 @@
 [project]
 name = "dcba-data-set"
-version = "0.1.0"
+version = "0.2.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [
-    { name = "Michał Czuba", email = "michal.czuba@pwr.edu.pl" }
+    { name = "Michał Czuba", email = "michal.czuba.1995@gmail.com" }
 ]
 requires-python = ">=3.12"
 dependencies = [
@@ -27,3 +27,8 @@ dcba-data-set = "dcba_data_set.main:main"
 [build-system]
 requires = ["uv_build>=0.9.18,<0.10.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]

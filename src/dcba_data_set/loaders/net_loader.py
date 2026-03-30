@@ -13,12 +13,13 @@ import networkx as nx
 import pandas as pd
 from tqdm import tqdm
 
-logger = logging.getLogger(__name__)
-
 from dcba_data_set.loaders.constants import MLN_ABCD_DATA_PATH
+
+logger = logging.getLogger(__name__)
 
 
 def load_edgelist(edgelist_path: Path) -> nd.MultilayerNetwork:
+    """Load a TSV edge list (``source``, ``target``, ``layer``) into a MultilayerNetwork."""
     edge_list = pd.read_csv(edgelist_path, sep="\t", names=["source", "target", "layer"])
     layer_names = edge_list["layer"].unique()
     layer_graphs = {}
@@ -29,6 +30,7 @@ def load_edgelist(edgelist_path: Path) -> nd.MultilayerNetwork:
 
 
 def read_mlnabcd_networks(net_name: str) -> dict[str, nd.MultilayerNetwork]:
+    """Load all mLN-ABCD networks matching ``net_name`` glob pattern from the data directory."""
     net_paths_regex = MLN_ABCD_DATA_PATH / net_name
     nets = {}
     progress_bar = tqdm(glob(str(net_paths_regex)))
@@ -48,29 +50,36 @@ def _prepare_network(net: nd.MultilayerNetwork) -> nd.MultilayerNetwork:
         l_graph.remove_edges_from(nx.selfloop_edges(l_graph))
         isolated_nodes = list(nx.isolates(l_graph))
         l_graph.remove_nodes_from(isolated_nodes)
-    if net.is_directed(): raise ValueError("Only undirected networks can be processed right now!")
+    if net.is_directed():
+        raise ValueError("Only undirected networks can be processed right now!")
     return net
 
 
 def prepare_network(load_network_func: Callable) -> Callable:
     """Remove isolated nodes and nodes with self-edges only from the network."""
+
     @wraps(load_network_func)
     def wrapper(*args, **kwargs) -> dict[tuple[str, str], nd.MultilayerNetwork]:
         net_dict = load_network_func(*args, **kwargs)
         logger.info("Removing self-loops and isolated nodes")
         return {
-            (net_type, net_name): _prepare_network(net_graph) for
-            (net_type, net_name), net_graph in net_dict.items()
+            (net_type, net_name): _prepare_network(net_graph)
+            for (net_type, net_name), net_graph in net_dict.items()
         }
+
     return wrapper
 
 
 @prepare_network
 def load_network(net_type: str, net_name: str) -> dict[tuple[str, str], nd.MultilayerNetwork]:
+    """Load networks of the given type and name, cleaning self-loops and isolated nodes.
+
+    :raises AttributeError: If ``net_type`` is unknown or no networks are found.
+    """
     if net_type == "mlnabcd":
         networks = read_mlnabcd_networks(net_name=net_name)
     else:
         raise AttributeError(f"Unknown network type: {net_type}")
     if len(networks) == 0:
-        raise AttributeError(f"Loaded 0 networks!")    
+        raise AttributeError("Loaded 0 networks!")
     return {(net_type, net_name): net_graph for net_name, net_graph in networks.items()}

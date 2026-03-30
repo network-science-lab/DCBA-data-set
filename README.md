@@ -1,7 +1,7 @@
 # DCBA Data Set
 
-This repository contains the DCBA data set along with the necessary code to generate and load
-the data.
+This repository contains the DCBA data set along with the necessary code to generate and load the
+data.
 
 ## Runtime Configuration
 
@@ -23,6 +23,13 @@ the data.
    ```bash
    dvc pull
    ```
+6. Install `pre-commit`:
+   ```bash
+   uv run pre-commit install --config .pre-commit-config.yaml
+   ```
+   This tool will automatically check code formatting (it's a very convinient configuration) and run
+   tests before each commit. To skip checks, use `git commit --no-verify`; to scan all files
+   execute: `pre-commit run --all-files --config .pre-commit-config.yaml`
 
 ## Usage
 
@@ -33,29 +40,25 @@ There are three functionalities provided by this repository:
 
 ### 1. ABCD Generator
 
-Generates a single ABCD graph from a given configuration. Set `experiment_type: "generate-abcd"`
-in the config. See `scripts/configs/example_generate/abcd.yaml` for an example.
+Generates a single ABCD graph from a given configuration. Set `experiment_type: "generate-abcd"` in
+the config. See `scripts/configs/example_generate/abcd.yaml` for an example.
 
 ### 2. mABCD Generator
 
 Generates a single multilayer mABCD graph from a given configuration. Set
-`experiment_type: "generate-mabcd"` in the config. See
-`scripts/configs/example_generate/mabcd.yaml` for an example.
+`experiment_type: "generate-mabcd"` in the config. See `scripts/configs/example_generate/mabcd.yaml`
+for an example.
 
 ### 3. Dataset Generator
 
-Samples multiple configurations from provided parameter ranges and generates a network for each.
-Set `experiment_type: "generate-dataset"` in the config. See
+Samples multiple configurations from provided parameter ranges and generates a network for each. Set
+`experiment_type: "generate-dataset"` in the config. See
 `scripts/configs/example_generate/dataset.yaml` (ABCD) and
 `scripts/configs/example_generate/dataset_mabcd.yaml` (mABCD) for examples.
-
-## Development Notes
-
-- Update the project version in `pyproject.toml`
 
 ## Doodles
 
 - Add DVC remote
 - Add code to load generated data
 - for mABCD the dataset generator should be modified to generate n-laytered networks (now it's only
-   hardcoded to 3 amd in fact still doesn't work)
+  hardcoded to 3 amd in fact still doesn't work)
