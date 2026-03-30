@@ -23,8 +23,8 @@ def parse_args(*args: str) -> argparse.Namespace:
         type=str,
         # default="scripts/configs/example_generate/mabcd.yaml",
         # default="scripts/configs/example_generate/abcd.yaml",
-        # default="scripts/configs/example_generate/dataset-abcd.yaml",
-        default="scripts/configs/example_generate/dataset-mabcd.yaml",
+        default="scripts/configs/example_generate/dataset-abcd.yaml",
+        # default="scripts/configs/example_generate/dataset-mabcd.yaml",
     )
     return parser.parse_args(*args)
 
