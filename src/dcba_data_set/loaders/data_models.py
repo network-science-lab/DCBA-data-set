@@ -12,7 +12,8 @@ from torch_geometric.data import HeteroData
 
 @dataclass
 class ConfigRecord:
-    """Config side of a (graph, config) pair.
+    """
+    Config side of a (graph, config) pair.
 
     :param instance_id: Identifier linking this config to its DCBAHeteroData replicas.
     :param data: Raw YAML dict of the generation parameters (e.g. ABCDConfig fields).
@@ -25,19 +26,22 @@ class ConfigRecord:
 
 
 class DCBAHeteroData(HeteroData):
-    """Graph side of a (graph, config) pair.
+    """
+    Class to represent a graphs (both mABCD and ABCD) for the DCBA dataset.
 
     Node store ``"actor"`` carries:
+        - ``community``: int tensor ``[num_actors, num_layers]`` of raw community IDs. Inactive
+            nodes (mABCD only) carry ``community = 0``.
 
-    - ``community``: int tensor ``[num_actors, num_layers]`` of raw community IDs.
-      Inactive nodes (mABCD only) carry ``community = 0``.
+    Edge store ``("actor", "l_<i>", "actor")`` carries:
+        - one COO ``edge_index`` per layer. ABCD graphs expose a single layer ``l_0``; mABCD graphs
+            expose one relation per layer.
 
-    Edge store ``("actor", "l_<i>", "actor")`` carries one COO ``edge_index`` per layer.
-    ABCD graphs expose a single layer ``l_0``; mABCD graphs expose one relation per layer.
-
-    Metadata attributes: ``instance_id`` (links to :class:`ConfigRecord`), ``replica``
-    (index within the instance), ``actors_map`` (bidict str node_id → tensor index),
-    ``layers_map`` (bidict original layer name → ``"l_<i>"``).
+    Metadata attributes:
+        - ``instance_id`` (links to :class:`ConfigRecord`),
+        - ``replica`` (index within the instance),
+        - ``actors_map`` (bidict str node_id -> tensor index),
+        - ``layers_map`` (bidict original layer name -> ``"l_<i>"``).
     """
 
     @classmethod
@@ -48,14 +52,16 @@ class DCBAHeteroData(HeteroData):
         instance_id: str,
         replica: int,
     ) -> "DCBAHeteroData":
-        """Build a DCBAHeteroData from a single-layer ABCD edge and community file.
+        """
+        Build a DCBAHeteroData from a single-layer ABCD edge and community file.
 
-        :param edges_path: Path to the edges CSV (with header) with columns
-            ``u``, ``v`` (1-indexed node IDs).
-        :param communities_path: Path to the communities CSV (with header) with
-            columns ``node``, ``community`` (1-indexed).
+        :param edges_path: Path to the edges CSV (with header) with columns ``u``, ``v``
+            (1-indexed node IDs).
+        :param communities_path: Path to the communities CSV (with header) with columns ``node``,
+            ``community`` (1-indexed).
         :param instance_id: Identifier linking this graph to its ConfigRecord.
         :param replica: Replica index within the instance.
+
         :returns: A populated DCBAHeteroData instance with a single layer ``l_0``.
         """
         data = cls()
@@ -99,16 +105,17 @@ class DCBAHeteroData(HeteroData):
         instance_id: str,
         replica: int,
     ) -> "DCBAHeteroData":
-        """Build a DCBAHeteroData from mABCD multilayer edge and community files.
+        """
+        Build a DCBAHeteroData from mABCD multilayer edge and community files.
 
-        :param edges_path: Path to the edges TSV (no header) with tab-separated columns
-            ``node_a``, ``node_b``, ``layer_idx`` (all 1-indexed).
+        :param edges_path: Path to the edges TSV (no header) with tab-separated columns ``node_a``,
+            ``node_b``, ``layer_idx`` (all 1-indexed).
         :param communities_path: Path to the communities TSV (no header) with tab-separated
             columns ``community_id``, ``layer_idx``.  Node IDs are implied by row position within
-            each layer block (first row of a block = node 1).  Inactive nodes carry
-            ``community = 0``.
+            each layer block (1st row of a block = node 1). Inactive nodes carry ``community = 0``.
         :param instance_id: Identifier linking this graph to its ConfigRecord.
         :param replica: Replica index within the instance.
+
         :returns: A populated DCBAHeteroData instance.
         """
         data = cls()

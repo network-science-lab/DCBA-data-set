@@ -151,3 +151,7 @@ class TestLoadMabcdReport:
                 assert (ei >= 0).all()
                 assert ei.max() < len(g.actors_map)
                 assert ei.shape[1] % 2 == 0
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])
