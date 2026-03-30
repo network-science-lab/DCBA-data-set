@@ -27,8 +27,8 @@ loading primitives for further training tasks (see the `../DCBA/` repository).
 
 ## Version management
 
-- When starting work on a new branch, bump `version` in `pyproject.toml` before making other
-  changes.
+- When starting work on a new branch, bump `version` in `pyproject.toml` before making other changes
+  (compare with the last version on `master`).
 
 ## Git workflow
 
