@@ -19,6 +19,8 @@ dependencies = [
     "tqdm~=4.66.4",
     "bidict>=0.22",
     "torch-geometric>=2.5",
+    "torch>=2.11.0",
+    "pre-commit>=4.5.1",
 ]
 
 [project.scripts]

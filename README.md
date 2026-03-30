@@ -29,7 +29,7 @@ data.
    ```
    This tool will automatically check code formatting (it's a very convinient configuration) and run
    tests before each commit. To skip checks, use `git commit --no-verify`; to scan all files
-   execute: `pre-commit run --all-files --config .pre-commit-config.yaml`
+   execute: `uv run pre-commit run --all-files --config .pre-commit-config.yaml`
 
 ## Usage
 
