@@ -23,6 +23,8 @@ loading primitives for further training tasks (see the `../DCBA/` repository).
   `:type x:`, `:returns:`, `:rtype:`, `:raises ExcType:`. For class attribute documentation use
   plain prose — do **not** use `:ivar:`.
 - Prefer `pathlib.Path` over bare strings for all file-system paths.
+- Always specify `encoding="utf-8"` explicitly on every file IO operation (`open()`, `Path.open()`,
+  etc.).
 - Prefer placing text in new line (i.e., \n after """) if docstring cannot fit in one line.
 
 ## Version management

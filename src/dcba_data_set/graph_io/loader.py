@@ -39,7 +39,7 @@ def load_report(
     report_path = Path(report_path)
     root = report_path.parent
 
-    with report_path.open() as f:
+    with report_path.open(encoding="utf-8") as f:
         report = json.load(f)
 
     net_type: str = report["net_type"]
@@ -54,7 +54,7 @@ def load_report(
         instance_id: str = instance["id"]
 
         config_path = root / instance["config"]
-        with config_path.open() as f:
+        with config_path.open(encoding="utf-8") as f:
             config_data = yaml.safe_load(f)
         configs[instance_id] = ConfigRecord(
             instance_id=instance_id,
