@@ -3,8 +3,7 @@
 ## Project overview
 
 Generates synthetic multilayer graphs via ABCD/mABCD (Julia-backed) and provides primitive data
-loading primitives for CLIP-style training. The companion training repository lives at
-`../infmax-trainer-icm-mln/`.
+loading primitives for further training tasks (see the `../DCBA/` repository).
 
 ## Environment
 
