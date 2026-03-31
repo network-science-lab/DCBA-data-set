@@ -19,7 +19,10 @@ dependencies = [
     "tqdm~=4.66.4",
     "bidict>=0.22",
     "torch-geometric>=2.5",
-    "torch>=2.11.0",
+    "torch>=2.5.1",
+    "pyg-lib>=0.4.0",
+    "torch-scatter>=2.1.2",
+    "torch-sparse>=0.6.18",
     "pre-commit>=4.5.1",
 ]
 
@@ -35,16 +38,23 @@ build-backend = "uv_build"
 # - torch_geometric 2.7.0 bug: llm/utils/backend_utils.py still imports from
 #   torch_geometric.distributed, which emits a deprecation warning since 2.7.0.
 #   No newer release is available to upgrade to.
-# - Vendor torch build nv24.4 (≈2.3.x) uses deprecated ast.Str / ast.Attribute.s
-#   AST APIs in torch/jit/frontend.py. Fixed upstream in torch 2.4+, but this
-#   environment uses a pinned NVIDIA build that cannot be replaced.
 filterwarnings = [
     "ignore:.*torch_geometric\\.distributed.*has been deprecated:DeprecationWarning",
-    "ignore:ast\\.Str is deprecated:DeprecationWarning:torch\\.jit\\.frontend",
-    "ignore:Attribute s is deprecated:DeprecationWarning:torch\\.jit\\.frontend",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
 ]
+
+[tool.uv]
+find-links = ["https://data.pyg.org/whl/torch-2.5.1+cu121.html"]
+no-build-package = ["torch-scatter", "torch-sparse", "pyg-lib"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu121" }
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true

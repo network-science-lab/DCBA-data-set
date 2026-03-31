@@ -51,8 +51,6 @@ def main() -> None:
 
     logger.info("Inferred experiment type as: %s", experiment_type)
     entrypoint(config)
-    # import torch
-    # print(torch.cuda.is_available())
 
 
 if __name__ == "__main__":
