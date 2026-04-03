@@ -19,14 +19,18 @@ loading primitives for further training tasks (see the `../DCBA/` repository).
 
 - Line length: **100 characters**.
 - Type hints are required on every function signature (arguments and return type).
-- Docstring style: **reStructuredText** (`:param x:`, `:returns:`, `:raises:`).
+- Docstring style: **reStructuredText** using standard Sphinx field directives only: `:param x:`,
+  `:type x:`, `:returns:`, `:rtype:`, `:raises ExcType:`. For class attribute documentation use
+  plain prose — do **not** use `:ivar:`.
 - Prefer `pathlib.Path` over bare strings for all file-system paths.
+- Always specify `encoding="utf-8"` explicitly on every file IO operation (`open()`, `Path.open()`,
+  etc.).
 - Prefer placing text in new line (i.e., \n after """) if docstring cannot fit in one line.
 
 ## Version management
 
-- When starting work on a new branch, bump `version` in `pyproject.toml` before making other
-  changes.
+- When starting work on a new branch, bump `version` in `pyproject.toml` before making other changes
+  (compare with the last version on `master`).
 
 ## Git workflow
 

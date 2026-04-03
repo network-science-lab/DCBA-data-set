@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from dcba_data_set.julia_ports.abcd import ABCDConfig, ABCDGraphGenerator
 from dcba_data_set.julia_ports.mabcd import mABCDConfig, mABCDGraphGenerator
-from dcba_data_set.params_handler import create_out_dir
+from dcba_data_set.utils import create_out_dir
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +98,7 @@ class DatasetGenerator:
                 )
                 continue
 
-            with open(instance_dir / "config.yaml", "w") as f:
+            with open(instance_dir / "config.yaml", "w", encoding="utf-8") as f:
                 yaml.dump(sampled_config.to_yaml(), f)
 
             instance_record = {
@@ -142,5 +142,5 @@ class DatasetGenerator:
 
             report["instances"].append(instance_record)
 
-        with open(out_dir / "report.json", "w") as f:
+        with open(out_dir / "report.json", "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2)
