@@ -1,0 +1,6 @@
+outs:
+- md5: 0c14aeaf4221bb3491111f807907f86a.dir
+  size: 519240031
+  nfiles: 4208
+  hash: md5
+  path: abcd-interim
