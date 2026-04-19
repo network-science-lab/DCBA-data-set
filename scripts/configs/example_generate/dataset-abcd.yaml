@@ -3,10 +3,10 @@ run:
   rng_seed: 43
 
 net_ranges:
-  n: [1000, 100000]
+  n: [1000, 10000]
   t1: [2.0, 4.0]
   t2: [1.5, 3.0]
-  xi: [0.01, 0.5]
+  xi: [0.01, 1.0]
   d_min_frac: [0.0005, 0.005] # fraction of n  →  d_min = round(d_min_frac * n)
   d_max_frac: [0.005, 0.05] # fraction of n, >= d_min_frac
   c_min_frac: [0.005, 0.05] # fraction of n
