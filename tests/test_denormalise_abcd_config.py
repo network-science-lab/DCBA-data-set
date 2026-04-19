@@ -2,7 +2,7 @@
 
 import pytest
 
-from dcba_data_set.ds_generator import denormalise_abcd_config
+from dcba_data_set.config_generators import denormalise_abcd_config
 
 
 def _base(n: int = 1000, **overrides: object) -> dict:
