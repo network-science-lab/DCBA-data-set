@@ -19,7 +19,7 @@ class TestTorch:
     def test_cuda_available(self) -> None:
         """CUDA must be reachable with the current driver."""
         assert CUDA_AVAILABLE, (
-            "CUDA is not available — check driver/torch CUDA version compatibility"
+            "CUDA is not available - check driver/torch CUDA version compatibility"
         )
 
     @cuda_only
