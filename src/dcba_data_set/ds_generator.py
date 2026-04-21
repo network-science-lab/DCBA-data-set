@@ -91,7 +91,7 @@ class DatasetGenerator:
             try:
                 sampled_config = cg(net_ranges)
             except RuntimeError as e:
-                logger.error("Skipping instance %d — %s", instance, e)
+                logger.error("Skipping instance %d: %s", instance, e)
                 instance_dir.rmdir()
                 report["instances"].append(
                     {"id": instance_id, "status": "skipped", "error": str(e), "replicas": []}

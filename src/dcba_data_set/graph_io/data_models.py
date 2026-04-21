@@ -6,23 +6,69 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
+import yaml
 from bidict import bidict
 from torch_geometric.data import HeteroData
 
 
 @dataclass
-class ConfigRecord:
+class ReplicaRecord:
+    """
+    Paths for a single replica -no I/O is performed at construction time.
+
+    replica: Replica index within the parent instance.
+    edges_path: Path to the edges file for this replica.
+    communities_path: Path to the communities file for this replica.
+    """
+
+    replica: int
+    edges_path: Path
+    communities_path: Path
+
+
+@dataclass
+class InstanceRecord:
+    """
+    Paths for one instance (one config → many replicas).
+
+    instance_id: Identifier shared with :class:`DCBAInstanceConfig` and :class:`DCBAHeteroData`.
+    net_type: Network type -``"abcd"`` or ``"mabcd"``.
+    config_path: Path to the config YAML file.
+    replicas: Ordered list of :class:`ReplicaRecord` objects for this instance.
+    """
+
+    instance_id: str
+    net_type: str
+    config_path: Path
+    replicas: list[ReplicaRecord]
+
+
+@dataclass
+class DCBAInstanceConfig:
     """
     Config side of a (graph, config) pair.
 
-    :param instance_id: Identifier linking this config to its DCBAHeteroData replicas.
-    :param data: Raw YAML dict of the generation parameters (e.g. ABCDConfig fields).
-    :param path: Path to the config.yaml from which data was loaded.
+    instance_id: Identifier linking this config to its DCBAHeteroData replicas.
+    data: Raw YAML dict of the generation parameters (e.g. ABCDConfig fields).
+    path: Path to the config.yaml from which data was loaded.
     """
 
     instance_id: str
     data: dict
     path: Path
+
+    @classmethod
+    def from_instance_record(cls, record: "InstanceRecord") -> "DCBAInstanceConfig":
+        """
+        Load a DCBAInstanceConfig by reading the YAML file referenced by an InstanceRecord.
+
+        :param record: InstanceRecord whose config_path will be read.
+
+        :returns: A populated DCBAInstanceConfig.
+        """
+        with record.config_path.open(encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        return cls(instance_id=record.instance_id, data=data, path=record.config_path)
 
 
 class DCBAHeteroData(HeteroData):
@@ -38,11 +84,37 @@ class DCBAHeteroData(HeteroData):
             expose one relation per layer.
 
     Metadata attributes:
-        - ``instance_id`` (links to :class:`ConfigRecord`),
+        - ``instance_id`` (links to :class:`DCBAInstanceConfig`),
         - ``replica`` (index within the instance),
         - ``actors_map`` (bidict str node_id -> tensor index),
         - ``layers_map`` (bidict original layer name -> ``"l_<i>"``).
     """
+
+    @classmethod
+    def from_replica_record(
+        cls, record: ReplicaRecord, instance_id: str, net_type: str
+    ) -> "DCBAHeteroData":
+        """
+        Build a DCBAHeteroData by dispatching to the correct factory based on net_type.
+
+        :param record: ReplicaRecord supplying the file paths and replica index.
+        :param instance_id: Identifier linking this graph to its DCBAInstanceConfig.
+        :param net_type: Network type -``"abcd"`` or ``"mabcd"``.
+
+        :returns: A populated DCBAHeteroData instance.
+        """
+        _factory = {
+            "abcd": cls.from_abcd_files,
+            "mabcd": cls.from_mabcd_files,
+        }
+        if net_type not in _factory:
+            raise ValueError(f"Unknown net_type {net_type!r}.")
+        return _factory[net_type](
+            edges_path=record.edges_path,
+            communities_path=record.communities_path,
+            instance_id=instance_id,
+            replica=record.replica,
+        )
 
     @classmethod
     def from_abcd_files(
@@ -59,7 +131,7 @@ class DCBAHeteroData(HeteroData):
             (1-indexed node IDs).
         :param communities_path: Path to the communities CSV (with header) with columns ``node``,
             ``community`` (1-indexed).
-        :param instance_id: Identifier linking this graph to its ConfigRecord.
+        :param instance_id: Identifier linking this graph to its DCBAInstanceConfig.
         :param replica: Replica index within the instance.
 
         :returns: A populated DCBAHeteroData instance with a single layer ``l_0``.
@@ -83,7 +155,7 @@ class DCBAHeteroData(HeteroData):
         edge_index = torch.cat([edge_index, edge_index.flip(0)], dim=1)
         data["actor", "l_0", "actor"].edge_index = edge_index
 
-        # Community tensor [num_actors, 1] — raw IDs from file.
+        # Community tensor [num_actors, 1] -raw IDs from file.
         num_actors = len(actors_map)
         community = torch.zeros(num_actors, 1, dtype=torch.long)
         actor_indices = comm_df["node"].astype(str).map(actors_map.get).values
@@ -113,7 +185,7 @@ class DCBAHeteroData(HeteroData):
         :param communities_path: Path to the communities TSV (no header) with tab-separated
             columns ``community_id``, ``layer_idx``.  Node IDs are implied by row position within
             each layer block (1st row of a block = node 1). Inactive nodes carry ``community = 0``.
-        :param instance_id: Identifier linking this graph to its ConfigRecord.
+        :param instance_id: Identifier linking this graph to its DCBAInstanceConfig.
         :param replica: Replica index within the instance.
 
         :returns: A populated DCBAHeteroData instance.

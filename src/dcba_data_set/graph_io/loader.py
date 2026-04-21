@@ -4,37 +4,25 @@ import json
 import logging
 from pathlib import Path
 
-import yaml
-
-from dcba_data_set.graph_io.data_models import ConfigRecord, DCBAHeteroData
+from dcba_data_set.graph_io.data_models import InstanceRecord, ReplicaRecord
 
 logger = logging.getLogger(__name__)
 
-_FACTORY = {
-    "abcd": DCBAHeteroData.from_abcd_files,
-    "mabcd": DCBAHeteroData.from_mabcd_files,
-}
+_KNOWN_NET_TYPES = {"abcd", "mabcd"}
 
 
-def load_report(
-    report_path: Path,
-) -> tuple[dict[str, ConfigRecord], list[DCBAHeteroData]]:
+def load_report(report_path: Path) -> list[InstanceRecord]:
     """
-    Load an ABCD or mABCD dataset from a ``report.json`` manifest.
+    Index an ABCD or mABCD dataset from a ``report.json`` manifest without reading any data files.
 
-    The graph type is determined by the ``net_type`` field in the manifest
-    (``"abcd"`` or ``"mabcd"``). Each replica of each instance becomes one
-    :class:`DCBAHeteroData` object. Replicas marked ``"ok": false`` are skipped
-    with a warning.
+    Reads only ``report.json``, resolves all paths relative to its parent directory, and returns
+    one :class:`InstanceRecord` per instance.  Replicas marked ``"ok": false`` are skipped with a
+    warning.
 
     :param report_path: Path to the ``report.json`` file written by
         :class:`~dcba_data_set.ds_generator.DatasetGenerator`.
-    :returns: A tuple ``(configs, graphs)`` where:
 
-        - ``configs`` maps ``instance_id → ConfigRecord`` (one entry per instance).
-        - ``graphs`` is a flat list of :class:`DCBAHeteroData` objects, one per
-          successful replica across all instances.
-    :raises ValueError: If the ``net_type`` field in the manifest is not recognised.
+    :returns: A list of :class:`InstanceRecord` objects, one per instance in the manifest.
     """
     report_path = Path(report_path)
     root = report_path.parent
@@ -43,25 +31,16 @@ def load_report(
         report = json.load(f)
 
     net_type: str = report["net_type"]
-    if net_type not in _FACTORY:
+    if net_type not in _KNOWN_NET_TYPES:
         raise ValueError(f"Unknown net_type {net_type!r} in {report_path}.")
-    factory = _FACTORY[net_type]
 
-    configs: dict[str, ConfigRecord] = {}
-    graphs: list[DCBAHeteroData] = []
+    records: list[InstanceRecord] = []
 
     for instance in report["instances"]:
         instance_id: str = instance["id"]
-
         config_path = root / instance["config"]
-        with config_path.open(encoding="utf-8") as f:
-            config_data = yaml.safe_load(f)
-        configs[instance_id] = ConfigRecord(
-            instance_id=instance_id,
-            data=config_data,
-            path=config_path,
-        )
 
+        replicas: list[ReplicaRecord] = []
         for replica_entry in instance["replicas"]:
             if not replica_entry.get("ok", True):
                 logger.warning(
@@ -70,23 +49,22 @@ def load_report(
                     instance_id,
                 )
                 continue
-
-            replica_idx: int = replica_entry["replica"]
-            edges_path = root / replica_entry["edges"]
-            communities_path = root / replica_entry["communities"]
-
-            graph = factory(
-                edges_path=edges_path,
-                communities_path=communities_path,
-                instance_id=instance_id,
-                replica=replica_idx,
+            replicas.append(
+                ReplicaRecord(
+                    replica=replica_entry["replica"],
+                    edges_path=root / replica_entry["edges"],
+                    communities_path=root / replica_entry["communities"],
+                )
             )
-            graphs.append(graph)
 
-    logger.info(
-        "Loaded %d configs and %d graphs from %s",
-        len(configs),
-        len(graphs),
-        report_path,
-    )
-    return configs, graphs
+        records.append(
+            InstanceRecord(
+                instance_id=instance_id,
+                net_type=net_type,
+                config_path=config_path,
+                replicas=replicas,
+            )
+        )
+
+    logger.info("Indexed %d instances from %s", len(records), report_path)
+    return records
