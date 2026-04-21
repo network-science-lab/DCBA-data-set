@@ -31,9 +31,9 @@ net_ranges:
 
 generator:
   net_type: "mabcd"
-  replicas: 5 # number of networks to generate from the given configuration
-  instances: 10 # number of valid configurations to use
-  max_trials: 3 # maximum number of trials to sample a valid configuration
-  out_dir: "./examples/generate_dataset-mabcd" # directory to save data in
-
-# Total number of generated networks is replicas * instances
+  out_dir: "./examples/generate_dataset-mabcd"
+  sampling:
+    method: "random"
+    instances: 10
+    max_trials: 3
+    replicas: 5
