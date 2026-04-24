@@ -14,11 +14,11 @@ from torch_geometric.data import HeteroData
 @dataclass
 class ReplicaRecord:
     """
-    Paths for a single replica -no I/O is performed at construction time.
+    Paths for a single replica. No I/O is performed at construction time.
 
-    replica: Replica index within the parent instance.
-    edges_path: Path to the edges file for this replica.
-    communities_path: Path to the communities file for this replica.
+    :param replica: Replica index within the parent instance.
+    :param edges_path: Path to the edges file for this replica.
+    :param communities_path: Path to the communities file for this replica.
     """
 
     replica: int
@@ -31,10 +31,11 @@ class InstanceRecord:
     """
     Paths for one instance (one config → many replicas).
 
-    instance_id: Identifier shared with :class:`DCBAInstanceConfig` and :class:`DCBAHeteroData`.
-    net_type: Network type -``"abcd"`` or ``"mabcd"``.
-    config_path: Path to the config YAML file.
-    replicas: Ordered list of :class:`ReplicaRecord` objects for this instance.
+    :param instance_id: Identifier shared with :class:`DCBAInstanceConfig` and
+        :class:`DCBAHeteroData`.
+    :param net_type: Network type: ``"abcd"`` or ``"mabcd"``.
+    :param config_path: Path to the config YAML file.
+    :param replicas: Ordered list of :class:`ReplicaRecord` objects for this instance.
     """
 
     instance_id: str
@@ -48,9 +49,9 @@ class DCBAInstanceConfig:
     """
     Config side of a (graph, config) pair.
 
-    instance_id: Identifier linking this config to its DCBAHeteroData replicas.
-    data: Raw YAML dict of the generation parameters (e.g. ABCDConfig fields).
-    path: Path to the config.yaml from which data was loaded.
+    :param instance_id: Identifier linking this config to its DCBAHeteroData replicas.
+    :param data: Raw YAML dict of the generation parameters (e.g. ABCDConfig fields).
+    :param path: Path to the config.yaml from which data was loaded.
     """
 
     instance_id: str
@@ -85,10 +86,33 @@ class DCBAHeteroData(HeteroData):
 
     Metadata attributes:
         - ``instance_id`` (links to :class:`DCBAInstanceConfig`),
-        - ``replica`` (index within the instance),
-        - ``actors_map`` (bidict str node_id -> tensor index),
-        - ``layers_map`` (bidict original layer name -> ``"l_<i>"``).
+        - ``replica`` (index within the instance; stacks to ``[B]`` tensor after batching),
+        - ``actors_map`` (bidict str node_id -> tensor index; list of bidicts after batching),
+        - ``layers_map`` (bidict original layer name -> ``"l_<i>"``; list of bidicts after batching).
     """
+
+    _NATIVE_ATTRS = frozenset({"actors_map", "layers_map"})
+
+    def __setattr__(self, key: str, value: object) -> None:
+        # Wrap bidict in a 1-tuple so PyG's collation sees a Sequence whose first element
+        # is not a Tensor — falls through to the else branch and is collected as a list.
+        if key in self._NATIVE_ATTRS:
+            super().__setattr__(key, (value,))
+        else:
+            super().__setattr__(key, value)
+
+    def __getattr__(self, key: str) -> object:
+        if key in self._NATIVE_ATTRS:
+            try:
+                raw = super().__getattr__(key)
+            except (AttributeError, KeyError):
+                return None
+            if isinstance(raw, list):   # batch: [(bd1,), (bd2,)] -> [bd1, bd2]
+                return [t[0] for t in raw]
+            if isinstance(raw, tuple):  # single graph: (bd,) -> bd
+                return raw[0]
+            return None
+        return super().__getattr__(key)
 
     @classmethod
     def from_replica_record(
@@ -99,7 +123,7 @@ class DCBAHeteroData(HeteroData):
 
         :param record: ReplicaRecord supplying the file paths and replica index.
         :param instance_id: Identifier linking this graph to its DCBAInstanceConfig.
-        :param net_type: Network type -``"abcd"`` or ``"mabcd"``.
+        :param net_type: Network type: ``"abcd"`` or ``"mabcd"``.
 
         :returns: A populated DCBAHeteroData instance.
         """
@@ -155,7 +179,7 @@ class DCBAHeteroData(HeteroData):
         edge_index = torch.cat([edge_index, edge_index.flip(0)], dim=1)
         data["actor", "l_0", "actor"].edge_index = edge_index
 
-        # Community tensor [num_actors, 1] -raw IDs from file.
+        # Community tensor [num_actors, 1] — raw IDs from file.
         num_actors = len(actors_map)
         community = torch.zeros(num_actors, 1, dtype=torch.long)
         actor_indices = comm_df["node"].astype(str).map(actors_map.get).values
@@ -163,7 +187,7 @@ class DCBAHeteroData(HeteroData):
         data["actor"].community = community
 
         data.instance_id = instance_id
-        data.replica = replica
+        data.replica = torch.tensor([replica], dtype=torch.long)
         data.actors_map = actors_map
         data.layers_map = layers_map
 
@@ -227,7 +251,7 @@ class DCBAHeteroData(HeteroData):
 
         data["actor"].community = community
         data.instance_id = instance_id
-        data.replica = replica
+        data.replica = torch.tensor([replica], dtype=torch.long)
         data.actors_map = actors_map
         data.layers_map = layers_map
 
