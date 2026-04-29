@@ -107,7 +107,7 @@ class DCBAHeteroData(HeteroData):
                 raw = super().__getattr__(key)
             except (AttributeError, KeyError):
                 return None
-            if isinstance(raw, list):   # batch: [(bd1,), (bd2,)] -> [bd1, bd2]
+            if isinstance(raw, list):  # batch: [(bd1,), (bd2,)] -> [bd1, bd2]
                 return [t[0] for t in raw]
             if isinstance(raw, tuple):  # single graph: (bd,) -> bd
                 return raw[0]
@@ -138,6 +138,32 @@ class DCBAHeteroData(HeteroData):
             communities_path=record.communities_path,
             instance_id=instance_id,
             replica=record.replica,
+        )
+
+    @classmethod
+    def from_real_world_graph(
+        cls, edges_path: Path, communities_path: Path, net_type: str
+    ) -> "DCBAHeteroData":
+        """
+        Build a DCBAHeteroData on real data by dispatching to the correct factory based on net_type.
+        Assumes edges and communities files structure identical to ABCD, mABCD for single layer and
+        multi layer graphs respectively.
+
+        :param net_type: Network type: ``"single_layer"`` or ``"multi_layer"``.
+
+        :returns: A populated DCBAHeteroData instance.
+        """
+        _factory = {
+            "single_layer": cls.from_abcd_files,
+            "multi_layer": cls.from_mabcd_files,
+        }
+        if net_type not in _factory:
+            raise ValueError(f"Unknown net_type {net_type!r}.")
+        return _factory[net_type](
+            edges_path=edges_path,
+            communities_path=communities_path,
+            instance_id="1",
+            replica=1,
         )
 
     @classmethod

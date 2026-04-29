@@ -80,7 +80,7 @@ class TestLoadAbcdReport:
             for replica in record.replicas:
                 g = DCBAHeteroData.from_replica_record(replica, record.instance_id, record.net_type)
                 assert g.instance_id in instance_ids
-                assert isinstance(g.replica, int)
+                assert isinstance(g.replica, torch.Tensor)
                 assert isinstance(g.actors_map, bidict)
                 assert isinstance(g.layers_map, bidict)
 
@@ -157,7 +157,7 @@ class TestLoadMabcdReport:
             for replica in record.replicas:
                 g = DCBAHeteroData.from_replica_record(replica, record.instance_id, record.net_type)
                 assert g.instance_id in instance_ids
-                assert isinstance(g.replica, int)
+                assert isinstance(g.replica, torch.Tensor)
                 assert isinstance(g.actors_map, bidict)
                 assert isinstance(g.layers_map, bidict)
 
