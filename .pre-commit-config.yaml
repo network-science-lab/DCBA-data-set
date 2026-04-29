@@ -23,9 +23,9 @@ repos:
     rev: v0.14.10
     hooks:
       - id: ruff-check
-        args: [--verbose, --config=.pc_config/ruff.toml, --fix]
+        args: [--config=.pc_config/ruff.toml, --fix]
       - id: ruff-format
-        args: [--verbose, --config=.pc_config/ruff.toml]
+        args: [--config=.pc_config/ruff.toml]
 
   # Hook to validate static typing in the code
   # - repo: https://github.com/pre-commit/mirrors-mypy

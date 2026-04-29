@@ -88,7 +88,7 @@ class DCBAHeteroData(HeteroData):
         - ``instance_id`` (links to :class:`DCBAInstanceConfig`),
         - ``replica`` (index within the instance; stacks to ``[B]`` tensor after batching),
         - ``actors_map`` (bidict str node_id -> tensor index; list of bidicts after batching),
-        - ``layers_map`` (bidict original layer name -> ``"l_<i>"``; list of bidicts after batching).
+        - ``layers_map`` (bidict original layer name -> ``"l_<i>"``;list of bidicts after batching).
     """
 
     _NATIVE_ATTRS = frozenset({"actors_map", "layers_map"})
@@ -123,13 +123,16 @@ class DCBAHeteroData(HeteroData):
 
         :param record: ReplicaRecord supplying the file paths and replica index.
         :param instance_id: Identifier linking this graph to its DCBAInstanceConfig.
-        :param net_type: Network type: ``"abcd"`` or ``"mabcd"``.
+        :param net_type: Network type: ``"abcd"``, ``"mabcd"``, ``"single_layer"``,
+        ``"multi_layer"``.
 
         :returns: A populated DCBAHeteroData instance.
         """
         _factory = {
             "abcd": cls.from_abcd_files,
             "mabcd": cls.from_mabcd_files,
+            "single_layer": cls.from_abcd_files,  # For real-world graphs with single layer format
+            "multi_layer": cls.from_mabcd_files,  # For real-world graphs with multi layer format
         }
         if net_type not in _factory:
             raise ValueError(f"Unknown net_type {net_type!r}.")
@@ -138,32 +141,6 @@ class DCBAHeteroData(HeteroData):
             communities_path=record.communities_path,
             instance_id=instance_id,
             replica=record.replica,
-        )
-
-    @classmethod
-    def from_real_world_graph(
-        cls, edges_path: Path, communities_path: Path, net_type: str
-    ) -> "DCBAHeteroData":
-        """
-        Build a DCBAHeteroData on real data by dispatching to the correct factory based on net_type.
-        Assumes edges and communities files structure identical to ABCD, mABCD for single layer and
-        multi layer graphs respectively.
-
-        :param net_type: Network type: ``"single_layer"`` or ``"multi_layer"``.
-
-        :returns: A populated DCBAHeteroData instance.
-        """
-        _factory = {
-            "single_layer": cls.from_abcd_files,
-            "multi_layer": cls.from_mabcd_files,
-        }
-        if net_type not in _factory:
-            raise ValueError(f"Unknown net_type {net_type!r}.")
-        return _factory[net_type](
-            edges_path=edges_path,
-            communities_path=communities_path,
-            instance_id="1",
-            replica=1,
         )
 
     @classmethod

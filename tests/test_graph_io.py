@@ -15,22 +15,6 @@ from dcba_data_set.graph_io import (
     load_report,
 )
 
-DATA_ROOT = Path(__file__).parent.parent / "data" / "test"
-ABCD_REPORT = DATA_ROOT / "dataset_abcd" / "report.json"
-MABCD_REPORT = DATA_ROOT / "dataset_mabcd" / "report.json"
-
-
-@pytest.fixture(scope="module")
-def abcd_records() -> list[InstanceRecord]:
-    """Index the ABCD test dataset once for the entire module."""
-    return load_report(ABCD_REPORT)
-
-
-@pytest.fixture(scope="module")
-def mabcd_records() -> list[InstanceRecord]:
-    """Index the mABCD test dataset once for the entire module."""
-    return load_report(MABCD_REPORT)
-
 
 def test_unknown_net_type(tmp_path: Path) -> None:
     """load_report raises ValueError for an unrecognised net_type."""
@@ -195,6 +179,74 @@ class TestLoadMabcdReport:
                     assert (ei >= 0).all()
                     assert ei.max() < len(g.actors_map)
                     assert ei.shape[1] % 2 == 0
+
+
+class TestLoadKarateReport:
+    """Tests for load_report against the karate test dataset."""
+
+    def test_counts(self, karate_records: list[InstanceRecord]) -> None:
+        """Loader returns one InstanceRecord with one ReplicaRecord for karate."""
+        assert len(karate_records) == 1
+        assert sum(len(r.replicas) for r in karate_records) == 1
+
+    def test_record_types(self, karate_records: list[InstanceRecord]) -> None:
+        """Each element is an InstanceRecord with ReplicaRecord children."""
+        for record in karate_records:
+            assert isinstance(record, InstanceRecord)
+            assert record.net_type == "single_layer"
+            assert record.instance_id == "karate"
+            for replica in record.replicas:
+                assert isinstance(replica, ReplicaRecord)
+
+    def test_graph_factory(self, karate_records: list[InstanceRecord]) -> None:
+        """from_replica_record returns a DCBAHeteroData for each replica."""
+        for record in karate_records:
+            for replica in record.replicas:
+                g = DCBAHeteroData.from_replica_record(replica, record.instance_id, record.net_type)
+                assert isinstance(g, DCBAHeteroData)
+
+    def test_graph_metadata(self, karate_records: list[InstanceRecord]) -> None:
+        """Each graph has instance_id, replica, actors_map, and layers_map set."""
+        instance_ids = {r.instance_id for r in karate_records}
+        for record in karate_records:
+            for replica in record.replicas:
+                g = DCBAHeteroData.from_replica_record(replica, record.instance_id, record.net_type)
+                assert g.instance_id in instance_ids
+                assert isinstance(g.replica, torch.Tensor)
+                assert isinstance(g.actors_map, bidict)
+                assert isinstance(g.layers_map, bidict)
+
+    def test_single_layer(self, karate_records: list[InstanceRecord]) -> None:
+        """Karate graph exposes exactly one layer relation."""
+        record = karate_records[0]
+        g = DCBAHeteroData.from_replica_record(
+            record.replicas[0], record.instance_id, record.net_type
+        )
+        assert g.edge_types == [("actor", "l_0", "actor")]
+        assert dict(g.layers_map) == {"0": "l_0"}
+
+    def test_community_shape(self, karate_records: list[InstanceRecord]) -> None:
+        """Community tensor has shape [num_actors, 1] with non-negative values."""
+        for record in karate_records:
+            for replica in record.replicas:
+                g = DCBAHeteroData.from_replica_record(replica, record.instance_id, record.net_type)
+                community = g["actor"].community
+                assert community.ndim == 2
+                assert community.shape[1] == 1
+                assert community.shape[0] == len(g.actors_map)
+                assert (community >= 0).all()
+
+    def test_edge_index_validity(self, karate_records: list[InstanceRecord]) -> None:
+        """Edge indices are non-negative, symmetric, and within actor bounds."""
+        for record in karate_records:
+            for replica in record.replicas:
+                g = DCBAHeteroData.from_replica_record(replica, record.instance_id, record.net_type)
+                ei = g["actor", "l_0", "actor"].edge_index
+                assert ei.dtype == torch.long
+                assert ei.shape[0] == 2
+                assert (ei >= 0).all()
+                assert ei.max() < len(g.actors_map)
+                assert ei.shape[1] % 2 == 0
 
 
 if __name__ == "__main__":

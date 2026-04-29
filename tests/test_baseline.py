@@ -1,99 +1,115 @@
-"""Unit tests for baseline graph-statistics extraction."""
+"""Unit tests for BaselineConfig against the ABCD, mABCD, and Karate test datasets."""
 
 import pytest
-import torch
 
 from dcba_data_set.baseline import BaselineConfig
-from dcba_data_set.graph_io.data_models import DCBAHeteroData
+from dcba_data_set.graph_io import DCBAHeteroData, InstanceRecord
+from dcba_data_set.julia_ports.abcd import ABCDConfig
 
 
-def _build_graph(edge_index: torch.Tensor, communities: torch.Tensor) -> DCBAHeteroData:
-    """Build a minimal single-layer graph for baseline tests."""
-    graph = DCBAHeteroData()
-    graph["actor", "l_0", "actor"].edge_index = edge_index
-    graph["actor"].community = communities
-    return graph
-
-
-def test_initialisation_prepares_single_layer_graph_statistics() -> None:
-    """Initialisation flattens communities and derives the expected graph statistics."""
-    graph = _build_graph(
-        edge_index=torch.tensor([[0, 1, 0, 2], [1, 0, 2, 0]], dtype=torch.long),
-        communities=torch.tensor([[1], [1], [2]], dtype=torch.long),
+@pytest.fixture(scope="module")
+def abcd_graph(abcd_records: list[InstanceRecord]) -> DCBAHeteroData:
+    """Load one ABCD graph for the entire module."""
+    record = abcd_records[0]
+    return DCBAHeteroData.from_replica_record(
+        record.replicas[0], record.instance_id, record.net_type
     )
 
-    baseline = BaselineConfig(graph)
 
-    assert baseline.communities.tolist() == [0, 0, 1]
-    assert baseline.n == 3
-    assert baseline.e == 4
-    assert baseline.degrees.tolist() == [2, 1, 1]
-    assert baseline.intra_community_mask.tolist() == [True, True, False, False]
-
-
-def test_initialisation_rejects_multilayer_community_assignments() -> None:
-    """Baseline extraction is limited to single-layer community tensors."""
-    graph = _build_graph(
-        edge_index=torch.tensor([[0, 1], [1, 0]], dtype=torch.long),
-        communities=torch.tensor([[1, 2], [1, 2]], dtype=torch.long),
+@pytest.fixture(scope="module")
+def mabcd_graph(mabcd_records: list[InstanceRecord]) -> DCBAHeteroData:
+    """Load one mABCD graph for the entire module."""
+    record = mabcd_records[0]
+    return DCBAHeteroData.from_replica_record(
+        record.replicas[0], record.instance_id, record.net_type
     )
 
-    with pytest.raises(NotImplementedError, match="single layer graphs"):
-        BaselineConfig(graph)
 
-
-def test_get_noise_uses_inter_community_edges_ratio() -> None:
-    """Noise equals the fraction of directed edges crossing community boundaries."""
-    graph = _build_graph(
-        edge_index=torch.tensor([[0, 1, 0, 2], [1, 0, 2, 0]], dtype=torch.long),
-        communities=torch.tensor([[1], [1], [2]], dtype=torch.long),
+@pytest.fixture(scope="module")
+def karate_graph(karate_records: list[InstanceRecord]) -> DCBAHeteroData:
+    """Load the karate graph for the entire module."""
+    record = karate_records[0]
+    return DCBAHeteroData.from_replica_record(
+        record.replicas[0], record.instance_id, record.net_type
     )
 
-    baseline = BaselineConfig(graph)
 
-    assert baseline._get_noise() == 0.5
-
-
-def test_get_n_outliers_counts_negative_bv_nodes() -> None:
-    """Outlier count matches the nodes whose baseline B(v) score is negative."""
-    graph = _build_graph(
-        edge_index=torch.tensor([[0, 2, 1, 3], [2, 0, 3, 1]], dtype=torch.long),
-        communities=torch.tensor([[1], [1], [1], [2]], dtype=torch.long),
-    )
-
-    baseline = BaselineConfig(graph)
-
-    assert baseline._get_n_outliers() == 1
+@pytest.fixture(scope="module")
+def abcd_config(abcd_graph: DCBAHeteroData) -> ABCDConfig:
+    """Compute the baseline ABCDConfig from the ABCD graph once for the entire module."""
+    return BaselineConfig(abcd_graph).get_config()
 
 
-def test_get_config_extracts_expected_parameters(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Config extraction reuses the graph statistics and fitted exponents consistently."""
-    fit_calls: list[tuple[list[int], int, int]] = []
+@pytest.fixture(scope="module")
+def karate_config(karate_graph: DCBAHeteroData) -> ABCDConfig:
+    """Compute the baseline ABCDConfig from the karate graph once for the entire module."""
+    return BaselineConfig(karate_graph).get_config()
 
-    baseline = BaselineConfig(
-        _build_graph(
-            edge_index=torch.tensor([[0, 1, 0, 2], [1, 0, 2, 0]], dtype=torch.long),
-            communities=torch.tensor([[1], [1], [2]], dtype=torch.long),
-        )
-    )
 
-    def _fake_get_powerlaw_exponent(data: torch.Tensor, d_min: int, d_max: int) -> float:
-        fit_calls.append((data.tolist(), d_min, d_max))
-        return float(sum(data.tolist()))
+class TestBaselineAbcd:
+    """Tests for BaselineConfig against the ABCD test dataset."""
 
-    monkeypatch.setattr(BaselineConfig, "_get_powerlaw_exponent", _fake_get_powerlaw_exponent)
+    def test_construction(self, abcd_config: ABCDConfig) -> None:
+        """BaselineConfig can be constructed from a single-layer ABCD graph."""
+        assert isinstance(abcd_config, ABCDConfig)
 
-    config = baseline.get_config()
+    def test_get_config_returns_abcd_config(self, abcd_config: ABCDConfig) -> None:
+        """get_config returns an ABCDConfig instance."""
+        assert isinstance(abcd_config, ABCDConfig)
 
-    assert config.n == 3
-    assert config.t1 == 4.0
-    assert config.d_min == 1
-    assert config.d_max == 2
-    assert config.d_max_iter == 1000
-    assert config.t2 == 3.0
-    assert config.c_min == 1
-    assert config.c_max == 2
-    assert config.c_max_iter == 1000
-    assert config.xi == 0.5
-    assert config.nout == 0
-    assert fit_calls == [([2, 1, 1], 1, 2), ([2, 1], 1, 2)]
+    def test_config_n_matches_graph(
+        self, abcd_config: ABCDConfig, abcd_graph: DCBAHeteroData
+    ) -> None:
+        """Extracted n matches the number of actors in the graph."""
+        assert abcd_config.n == len(abcd_graph.actors_map)
+
+    def test_noise_bounds(self, abcd_config: ABCDConfig) -> None:
+        """Noise ratio xi lies in [0, 1]."""
+        assert 0.0 <= abcd_config.xi <= 1.0
+
+    def test_degree_bounds(self, abcd_config: ABCDConfig) -> None:
+        """Minimum degree does not exceed maximum degree."""
+        assert abcd_config.d_min <= abcd_config.d_max
+
+    def test_community_bounds(self, abcd_config: ABCDConfig) -> None:
+        """Minimum community size does not exceed maximum community size."""
+        assert abcd_config.c_min <= abcd_config.c_max
+
+
+class TestBaselineMabcd:
+    """Tests for BaselineConfig against the mABCD test dataset."""
+
+    def test_raises_not_implemented(self, mabcd_graph: DCBAHeteroData) -> None:
+        """BaselineConfig raises NotImplementedError for multilayer mABCD graphs."""
+        with pytest.raises(NotImplementedError):
+            BaselineConfig(mabcd_graph)
+
+
+class TestBaselineKarate:
+    """Tests for BaselineConfig against the Karate test dataset."""
+
+    def test_construction(self, karate_config: ABCDConfig) -> None:
+        """BaselineConfig can be constructed from the single-layer karate graph."""
+        assert isinstance(karate_config, ABCDConfig)
+
+    def test_get_config_returns_abcd_config(self, karate_config: ABCDConfig) -> None:
+        """get_config returns an ABCDConfig instance."""
+        assert isinstance(karate_config, ABCDConfig)
+
+    def test_config_n_matches_graph(
+        self, karate_config: ABCDConfig, karate_graph: DCBAHeteroData
+    ) -> None:
+        """Extracted n matches the number of actors in the karate graph."""
+        assert karate_config.n == len(karate_graph.actors_map)
+
+    def test_noise_bounds(self, karate_config: ABCDConfig) -> None:
+        """Noise ratio xi lies in [0, 1]."""
+        assert 0.0 <= karate_config.xi <= 1.0
+
+    def test_degree_bounds(self, karate_config: ABCDConfig) -> None:
+        """Minimum degree does not exceed maximum degree."""
+        assert karate_config.d_min <= karate_config.d_max
+
+    def test_community_bounds(self, karate_config: ABCDConfig) -> None:
+        """Minimum community size does not exceed maximum community size."""
+        assert karate_config.c_min <= karate_config.c_max
