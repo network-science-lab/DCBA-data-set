@@ -7,7 +7,6 @@ import pytest
 from dcba_data_set.graph_io import InstanceRecord, load_report
 
 DATA_ROOT = Path(__file__).parent.parent / "data" / "test"
-DATA_ROOT = Path("/workspace/dock/DCBA-data-set/data/test")  # For pytest running from project root, which is the default --- IGNORE ---
 ABCD_REPORT = DATA_ROOT / "dataset_abcd" / "report.json"
 MABCD_REPORT = DATA_ROOT / "dataset_mabcd" / "report.json"
 KARATE_REPORT = DATA_ROOT / "dataset_karate" / "report.json"
