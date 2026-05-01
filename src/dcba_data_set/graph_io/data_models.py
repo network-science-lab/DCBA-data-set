@@ -88,7 +88,7 @@ class DCBAHeteroData(HeteroData):
         - ``instance_id`` (links to :class:`DCBAInstanceConfig`),
         - ``replica`` (index within the instance; stacks to ``[B]`` tensor after batching),
         - ``actors_map`` (bidict str node_id -> tensor index; list of bidicts after batching),
-        - ``layers_map`` (bidict original layer name -> ``"l_<i>"``; list of bidicts after batching).
+        - ``layers_map`` (bidict original layer name -> ``"l_<i>"``;list of bidicts after batching).
     """
 
     _NATIVE_ATTRS = frozenset({"actors_map", "layers_map"})
@@ -107,7 +107,7 @@ class DCBAHeteroData(HeteroData):
                 raw = super().__getattr__(key)
             except (AttributeError, KeyError):
                 return None
-            if isinstance(raw, list):   # batch: [(bd1,), (bd2,)] -> [bd1, bd2]
+            if isinstance(raw, list):  # batch: [(bd1,), (bd2,)] -> [bd1, bd2]
                 return [t[0] for t in raw]
             if isinstance(raw, tuple):  # single graph: (bd,) -> bd
                 return raw[0]
@@ -123,13 +123,16 @@ class DCBAHeteroData(HeteroData):
 
         :param record: ReplicaRecord supplying the file paths and replica index.
         :param instance_id: Identifier linking this graph to its DCBAInstanceConfig.
-        :param net_type: Network type: ``"abcd"`` or ``"mabcd"``.
+        :param net_type: Network type: ``"abcd"``, ``"mabcd"``, ``"single_layer"``,
+        ``"multi_layer"``.
 
         :returns: A populated DCBAHeteroData instance.
         """
         _factory = {
             "abcd": cls.from_abcd_files,
             "mabcd": cls.from_mabcd_files,
+            "single_layer": cls.from_abcd_files,  # For real-world graphs with single layer format
+            "multi_layer": cls.from_mabcd_files,  # For real-world graphs with multi layer format
         }
         if net_type not in _factory:
             raise ValueError(f"Unknown net_type {net_type!r}.")

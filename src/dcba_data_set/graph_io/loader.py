@@ -8,12 +8,12 @@ from dcba_data_set.graph_io.data_models import InstanceRecord, ReplicaRecord
 
 logger = logging.getLogger(__name__)
 
-_KNOWN_NET_TYPES = {"abcd", "mabcd"}
+_KNOWN_NET_TYPES = {"abcd", "mabcd", "single_layer", "multi_layer"}
 
 
 def load_report(report_path: Path) -> list[InstanceRecord]:
     """
-    Index an ABCD or mABCD dataset from a ``report.json`` manifest without reading any data files.
+    Index a dataset from a ``report.json`` manifest without reading any data files.
 
     Reads only ``report.json``, resolves all paths relative to its parent directory, and returns
     one :class:`InstanceRecord` per instance.  Replicas marked ``"ok": false`` are skipped with a
@@ -38,7 +38,7 @@ def load_report(report_path: Path) -> list[InstanceRecord]:
 
     for instance in report["instances"]:
         instance_id: str = instance["id"]
-        config_path = root / instance["config"]
+        config_path = root / instance.get("config", "")
 
         replicas: list[ReplicaRecord] = []
         for replica_entry in instance["replicas"]:
