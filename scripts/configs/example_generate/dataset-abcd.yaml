@@ -7,11 +7,11 @@ net_ranges:
   t1: [2.0, 3.0]
   t2: [1.0, 2.0]
   xi: [0.01, 1.0]
-  d_min_frac: [1e-10, 0.005] # fraction of n  →  d_min = round(d_min_frac * n)
+  d_min_frac: [1e-10, 0.005] # fraction of n, 1e-10 used to force lower bound of 1
   d_max_frac: [0.005, 0.5] # fraction of n, >= d_min_frac
-  c_min_frac: [1e-10, 0.05] # fraction of n  →  c_min = round(c_min_frac * n)
+  c_min_frac: [1e-10, 0.05] # fraction of n, 1e-10 used to force lower bound of 1
   c_max_frac: [0.05, 0.5] # fraction of n, >= c_min_frac; capped at n
-  nout_frac: [0.0, 0.10] # fraction of n  →  nout = round(nout_frac * n)
+  nout_frac: [0.0, 0.05] # fraction of n  →  nout = round(nout_frac * n)
   d_max_iter: 1000
   c_max_iter: 1000
   islocal: false

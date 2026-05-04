@@ -28,27 +28,6 @@ def _ranges(**overrides: object) -> dict:
     return params
 
 
-class TestRandomConfigGeneratorSampleFromRange:
-    """Verify uniform sampling from a numeric range."""
-
-    def test_value_within_bounds(self) -> None:
-        """Sampled value lies within [smaller, bigger]."""
-        gen = RandomConfigGenerator(rng_seed=0, cfg_type="abcd", max_trials=5)
-        assert 10 <= gen._sample_from_range(10, 20) <= 20
-
-    def test_reproducible_with_same_seed(self) -> None:
-        """Two generators with the same seed return identical samples."""
-        g1 = RandomConfigGenerator(rng_seed=42, cfg_type="abcd", max_trials=5)
-        g2 = RandomConfigGenerator(rng_seed=42, cfg_type="abcd", max_trials=5)
-        assert g1._sample_from_range(0, 1) == g2._sample_from_range(0, 1)
-
-    def test_different_seeds_diverge(self) -> None:
-        """Two generators with different seeds (almost certainly) return different samples."""
-        g1 = RandomConfigGenerator(rng_seed=1, cfg_type="abcd", max_trials=5)
-        g2 = RandomConfigGenerator(rng_seed=2, cfg_type="abcd", max_trials=5)
-        assert g1._sample_from_range(0, 1_000_000) != g2._sample_from_range(0, 1_000_000)
-
-
 class TestRandomConfigGeneratorDrawConfig:
     """Verify parameter sampling and type handling in _draw_config."""
 

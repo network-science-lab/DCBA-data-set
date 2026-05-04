@@ -160,6 +160,8 @@ class GridConfigGenerator:
         :param param_name: Name of the parameter being gridded.
 
         :returns: Step count for this parameter.
+
+        :raises ValueError: If no grid_steps entry is found for the parameter.
         """
         if isinstance(self.grid_steps, dict):
             if param_name not in self.grid_steps:
