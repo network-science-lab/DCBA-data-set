@@ -133,12 +133,18 @@ class RandomConfigGenerator:
 class GridConfigGenerator:
     """Generate all valid configs in the Cartesian product of a parameter grid."""
 
-    def __init__(self, cfg_type: Literal["abcd", "mabcd"], grid_steps: int) -> None:
+    def __init__(
+        self, cfg_type: Literal["abcd", "mabcd"], grid_steps: int | dict[str, int]
+    ) -> None:
         """
         Initialise the grid generator.
 
         :param cfg_type: Network type; only ``"abcd"`` is currently supported.
         :param grid_steps: Number of evenly-spaced values per ``[min, max]`` range.
+            Either a single integer applied uniformly to all range parameters, or a
+            mapping from parameter name to its individual step count. When a mapping is
+            given, every parameter whose value is a ``[min, max]`` range must have a
+            corresponding entry.
         """
         if cfg_type != "abcd":
             raise NotImplementedError(
@@ -147,14 +153,33 @@ class GridConfigGenerator:
         self.julia_config = ABCDConfig
         self.grid_steps = grid_steps
 
+    def _steps_for(self, param_name: str) -> int:
+        """
+        Return the number of grid steps for *param_name*.
+
+        :param param_name: Name of the parameter being gridded.
+
+        :returns: Step count for this parameter.
+        """
+        if isinstance(self.grid_steps, dict):
+            if param_name not in self.grid_steps:
+                raise ValueError(
+                    f"No grid_steps entry for range parameter {param_name!r}. "
+                    "Add it to the grid_steps mapping or use a single integer value."
+                )
+            return self.grid_steps[param_name]
+        return self.grid_steps
+
     def generate(self, config_ranges: dict[str, Any]) -> list[Any]:
         """
         Return all valid configs in the Cartesian product of the parameter grid.
 
-        For each ``[min, max]`` pair in *config_ranges*, ``grid_steps`` evenly-spaced
-        values are produced via ``numpy.linspace``. Fixed (non-list) values are held
-        constant. ``denormalise_abcd_config`` is applied to each combination before
-        Pydantic validation; invalid points are silently dropped (one WARNING per point).
+        For each ``[min, max]`` pair in *config_ranges*, the corresponding number of
+        evenly-spaced values is produced via ``numpy.linspace`` — either the global
+        ``grid_steps`` integer or the per-parameter value from the ``grid_steps``
+        mapping. Fixed (non-list) values are held constant. ``denormalise_abcd_config``
+        is applied to each combination before Pydantic validation; invalid points are
+        silently dropped (one WARNING per point).
 
         :param config_ranges: Parameter ranges from the dataset YAML.
 
@@ -165,12 +190,13 @@ class GridConfigGenerator:
 
         for name, value in config_ranges.items():
             if isinstance(value, list) and len(value) == 2:
+                steps = self._steps_for(name)
                 lo, hi = value
                 if isinstance(lo, int) and isinstance(hi, int):
-                    raw = np.linspace(lo, hi, self.grid_steps)
+                    raw = np.linspace(lo, hi, steps)
                     grid: list[Any] = list(np.unique(raw.astype(int)))
                 else:
-                    grid = list(np.linspace(lo, hi, self.grid_steps))
+                    grid = list(np.linspace(lo, hi, steps))
             else:
                 grid = [value]
             param_names.append(name)

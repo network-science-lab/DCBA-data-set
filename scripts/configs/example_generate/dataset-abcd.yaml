@@ -4,14 +4,14 @@ run:
 
 net_ranges:
   n: [1000, 10000]
-  t1: [2.0, 4.0]
-  t2: [1.5, 3.0]
+  t1: [2.0, 3.0]
+  t2: [1.0, 2.0]
   xi: [0.01, 1.0]
-  d_min_frac: [0.0005, 0.005] # fraction of n  →  d_min = round(d_min_frac * n)
-  d_max_frac: [0.005, 0.05] # fraction of n, >= d_min_frac
-  c_min_frac: [0.005, 0.05] # fraction of n
-  c_max_frac: [0.05, 0.3] # fraction of n, >= c_min_frac; capped at n
-  nout_frac: [0.0, 0.01] # fraction of n
+  d_min_frac: [1e-10, 0.005] # fraction of n  →  d_min = round(d_min_frac * n)
+  d_max_frac: [0.005, 0.5] # fraction of n, >= d_min_frac
+  c_min_frac: [1e-10, 0.05] # fraction of n  →  c_min = round(c_min_frac * n)
+  c_max_frac: [0.05, 0.5] # fraction of n, >= c_min_frac; capped at n
+  nout_frac: [0.0, 0.10] # fraction of n  →  nout = round(nout_frac * n)
   d_max_iter: 1000
   c_max_iter: 1000
   islocal: false
@@ -22,14 +22,30 @@ net_ranges:
 generator:
   net_type: "abcd"
   out_dir: "./examples/generate_dataset-abcd"
-  sampling:
-    method: "random"
-    instances: 10
-    max_trials: 3
-    replicas: 5
+  # sampling:
+  #   method: "random"
+  #   instances: 10
+  #   max_trials: 3
+  #   replicas: 5
 
-  # Grid sampling — uncomment and replace the sampling block above to switch modes.
+  # Uniform grid sampling — uncomment and replace the sampling block above to switch modes.
+  # Uniform grid: one step count applied to every range parameter.
   # sampling:
   #   method: "grid"
   #   grid_steps: 5
-  #   replicas: 3
+  #   replicas: 10
+
+  # Irregular grid: per-parameter step counts (every range parameter must be listed).
+  sampling:
+    method: "grid"
+    grid_steps:
+      n: 5
+      t1: 3
+      t2: 3
+      xi: 5
+      d_min_frac: 3
+      d_max_frac: 5
+      c_min_frac: 3
+      c_max_frac: 5
+      nout_frac: 3
+    replicas: 10
