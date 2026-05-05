@@ -1,0 +1,28 @@
+run:
+  experiment_type: "generate-dataset"
+  rng_seed: 43
+
+net_ranges:
+  n: [50, 10000]
+  t1: [2.0, 3.5] # degree distribution: from heavy-tailed to lighter
+  d_min: [3, 8]
+  d_max: [30, 80]
+  d_max_iter: 1000
+  t2: [1.5, 2.5] # community size distribution
+  c_min: [15, 40]
+  c_max: [80, 300]
+  c_max_iter: 1000
+  xi: [0.05, 0.45] # noise: key structural signal for the model
+  islocal: False
+  isCL: False
+  nout: [0, 20]
+  edges_filename: edges.dat
+  communities_filename: communities.dat
+
+generator:
+  net_type: "abcd"
+  replicas: 10 # same config → different graphs; model sees stochasticity
+  instances: 200 # diverse configs; total = 60 graphs
+  max_trials: 10 # slightly generous — tighter ranges can still occasionally fail
+  out_dir: "./examples/generate_dataset-abcd-interim"
+# Total number of generated networks is replicas * instances
