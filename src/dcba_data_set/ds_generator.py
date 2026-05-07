@@ -75,7 +75,7 @@ class DatasetGenerator:
         """Iterate over a config list, create instance dirs and run graph generation."""
         p_bar = tqdm(configs, desc="Instance", leave=False, colour="green")
         for sampled_config in p_bar:
-            instance_id = str(uuid.uuid4())[:8]
+            instance_id = str(uuid.uuid4())
             instance_dir = out_dir / instance_id
             instance_dir.mkdir(parents=True, exist_ok=True)
             self._run_instance(
