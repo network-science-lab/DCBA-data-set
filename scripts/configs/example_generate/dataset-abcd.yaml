@@ -36,16 +36,21 @@ generator:
   #   replicas: 10
 
   # Irregular grid: per-parameter step counts (every range parameter must be listed).
+  # sampling:
+  #   method: "grid"
+  #   grid_steps:
+  #     n: 5
+  #     t1: 3
+  #     t2: 3
+  #     xi: 5
+  #     d_min_frac: 3
+  #     d_max_frac: 5
+  #     c_min_frac: 3
+  #     c_max_frac: 5
+  #     nout_frac: 3
+  #   replicas: 10
+
+  # Borderline sampling: sampling graphs from all combinations of min and max values of the parameter ranges.
   sampling:
-    method: "grid"
-    grid_steps:
-      n: 5
-      t1: 3
-      t2: 3
-      xi: 5
-      d_min_frac: 3
-      d_max_frac: 5
-      c_min_frac: 3
-      c_max_frac: 5
-      nout_frac: 3
+    method: "borderline"
     replicas: 10
