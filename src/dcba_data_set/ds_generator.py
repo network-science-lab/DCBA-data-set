@@ -9,7 +9,11 @@ from typing import Any
 import yaml
 from tqdm import tqdm
 
-from dcba_data_set.config_generators import GridConfigGenerator, RandomConfigGenerator
+from dcba_data_set.config_generators import (
+    BorderlineConfigGenerator,
+    GridConfigGenerator,
+    RandomConfigGenerator,
+)
 from dcba_data_set.julia_ports.abcd import ABCDGraphGenerator
 from dcba_data_set.julia_ports.mabcd import mABCDGraphGenerator
 from dcba_data_set.utils import create_out_dir
@@ -49,6 +53,8 @@ class DatasetGenerator:
                 cfg_type=net_type,
                 max_trials=sampling["max_trials"],
             ).generate(net_ranges, sampling["instances"])
+        elif method == "borderline":
+            configs = BorderlineConfigGenerator(cfg_type=net_type).generate(net_ranges)
         else:
             raise ValueError(f"Unknown sampling method: {method!r}")
 

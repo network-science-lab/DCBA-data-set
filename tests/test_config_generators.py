@@ -1,10 +1,14 @@
-"""Unit tests for RandomConfigGenerator and GridConfigGenerator."""
+"""Unit tests for RandomConfigGenerator, GridConfigGenerator, and BorderlineConfigGenerator."""
 
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from dcba_data_set.config_generators import GridConfigGenerator, RandomConfigGenerator
+from dcba_data_set.config_generators import (
+    BorderlineConfigGenerator,
+    GridConfigGenerator,
+    RandomConfigGenerator,
+)
 
 _PATCH = "dcba_data_set.config_generators.ABCDConfig.from_yaml"
 
@@ -237,5 +241,69 @@ class TestGridConfigGeneratorDropsInvalidPoints:
     def test_all_invalid_returns_empty_list(self) -> None:
         """Returns an empty list when every grid point fails validation."""
         gen = GridConfigGenerator(cfg_type="abcd", grid_steps=2)
+        with patch(_PATCH, side_effect=ValueError("always invalid")):
+            assert gen.generate(_ranges(d_min=[3, 9])) == []
+
+
+class TestBorderlineConfigGeneratorInit:
+    """Verify constructor behaviour."""
+
+    def test_raises_for_unsupported_cfg_type(self) -> None:
+        """Raises NotImplementedError when cfg_type is not 'abcd'."""
+        with pytest.raises(NotImplementedError):
+            BorderlineConfigGenerator(cfg_type="mabcd")
+
+    def test_accepts_abcd_cfg_type(self) -> None:
+        """Constructs successfully for cfg_type='abcd'."""
+        gen = BorderlineConfigGenerator(cfg_type="abcd")
+        assert gen.julia_config is not None
+
+
+class TestBorderlineConfigGeneratorGenerate:
+    """Verify that generate() enumerates all min/max corners."""
+
+    def test_two_range_params_produce_four_combos(self) -> None:
+        """Two range parameters yield 2^2 = 4 corner combinations."""
+        gen = BorderlineConfigGenerator(cfg_type="abcd")
+        with patch(_PATCH, return_value=MagicMock()):
+            results = gen.generate(_ranges(d_min=[3, 9], d_max=[30, 90]))
+        assert len(results) == 4
+
+    def test_single_range_param_produces_two_combos(self) -> None:
+        """One range parameter yields exactly 2 corners (min and max)."""
+        gen = BorderlineConfigGenerator(cfg_type="abcd")
+        with patch(_PATCH, return_value=MagicMock()):
+            results = gen.generate(_ranges(d_min=[3, 9]))
+        assert len(results) == 2
+
+    def test_boundary_values_are_exact_range_endpoints(self) -> None:
+        """Generated parameter values are exactly the min and max from the range."""
+        gen = BorderlineConfigGenerator(cfg_type="abcd")
+        captured: list[dict] = []
+        with patch(_PATCH, side_effect=lambda p: captured.append(dict(p)) or MagicMock()):
+            gen.generate(_ranges(d_min=[3, 9]))
+        d_min_values = sorted({p["d_min"] for p in captured})
+        assert d_min_values == [3, 9]
+
+    def test_fixed_params_unchanged_across_all_combos(self) -> None:
+        """Fixed parameters retain their original value in every corner config."""
+        gen = BorderlineConfigGenerator(cfg_type="abcd")
+        captured: list[dict] = []
+        with patch(_PATCH, side_effect=lambda p: captured.append(dict(p)) or MagicMock()):
+            gen.generate(_ranges(d_min=[3, 9]))
+        assert all(p["n"] == 1000 for p in captured)
+        assert all(p["xi"] == pytest.approx(0.3) for p in captured)
+
+    def test_invalid_corners_are_dropped(self) -> None:
+        """Corners that fail validation are excluded; valid ones are returned."""
+        gen = BorderlineConfigGenerator(cfg_type="abcd")
+        mock_cfg = MagicMock()
+        with patch(_PATCH, side_effect=[ValueError("invalid"), mock_cfg]):
+            results = gen.generate(_ranges(d_min=[3, 9]))
+        assert len(results) == 1
+
+    def test_all_invalid_returns_empty_list(self) -> None:
+        """Returns an empty list when every corner fails validation."""
+        gen = BorderlineConfigGenerator(cfg_type="abcd")
         with patch(_PATCH, side_effect=ValueError("always invalid")):
             assert gen.generate(_ranges(d_min=[3, 9])) == []

@@ -1,4 +1,4 @@
-"""Config generators for random and grid-based dataset sampling."""
+"""Config generators for random, grid-based, and borderline dataset sampling."""
 
 import itertools
 import logging
@@ -216,4 +216,64 @@ class GridConfigGenerator:
                 logger.warning("Dropping grid point %s: %s", params, e)
 
         logger.info("Grid: %d valid / %d attempted", len(valid_configs), total)
+        return valid_configs
+
+
+class BorderlineConfigGenerator:
+    """Generate configs from all combinations of the min and max of every parameter range.
+
+    Each ``[min, max]`` range contributes two candidate values; the generator yields the
+    Cartesian product of those pairs across all range parameters (2^N combinations for N
+    range parameters).  Fixed (non-list) values are held constant throughout.
+    """
+
+    def __init__(self, cfg_type: Literal["abcd", "mabcd"]) -> None:
+        """
+        Initialise the borderline generator.
+
+        :param cfg_type: Network type; only ``"abcd"`` is currently supported.
+        """
+        if cfg_type != "abcd":
+            raise NotImplementedError(
+                f"Borderline sampling is not yet supported for cfg_type={cfg_type!r}"
+            )
+        self.julia_config = ABCDConfig
+
+    def generate(self, config_ranges: dict[str, Any]) -> list[Any]:
+        """
+        Return all valid configs at the corners of the parameter space.
+
+        For every ``[min, max]`` pair in *config_ranges* both boundary values are used;
+        the full Cartesian product across all range parameters is enumerated.
+        ``denormalise_abcd_config`` is applied to each combination before Pydantic
+        validation; invalid corners are silently dropped (one WARNING per point).
+
+        :param config_ranges: Parameter ranges from the dataset YAML.
+
+        :returns: List of validated config instances.
+        """
+        param_names: list[str] = []
+        param_grids: list[list[Any]] = []
+
+        for name, value in config_ranges.items():
+            if isinstance(value, list) and len(value) == 2:
+                lo, hi = value
+                grid: list[Any] = [lo, hi]
+            else:
+                grid = [value]
+            param_names.append(name)
+            param_grids.append(grid)
+
+        total = sum(1 for _ in itertools.product(*param_grids))
+        valid_configs: list[Any] = []
+
+        for combo in itertools.product(*param_grids):
+            params = dict(zip(param_names, combo))
+            params = denormalise_abcd_config(params)
+            try:
+                valid_configs.append(self.julia_config.from_yaml(params))
+            except Exception as e:
+                logger.warning("Dropping borderline point %s: %s", params, e)
+
+        logger.info("Borderline: %d valid / %d attempted", len(valid_configs), total)
         return valid_configs
