@@ -107,7 +107,7 @@ class DatasetGenerator:
             communities_rel = f"{instance_id}/communities_{replica}.dat"
             sampled_config.edges_filename = str(instance_dir / f"edges_{replica}.dat")
             sampled_config.communities_filename = str(instance_dir / f"communities_{replica}.dat")
-            sampled_config.seed = config["run"]["rng_seed"]
+            sampled_config.seed = config["run"]["rng_seed"] + replica
 
             try:
                 generator()(sampled_config)
