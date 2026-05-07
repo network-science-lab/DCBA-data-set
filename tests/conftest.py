@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import juliacall  # noqa: F401
 import pytest
 
 from dcba_data_set.graph_io import InstanceRecord, load_report
