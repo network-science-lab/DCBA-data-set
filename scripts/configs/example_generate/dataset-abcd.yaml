@@ -7,13 +7,13 @@ net_ranges:
   t1: [2.0, 3.0]
   t2: [1.0, 2.0]
   xi: [0.01, 1.0]
-  d_min_frac: [1e-10, 0.005] # fraction of n, 1e-10 used to force lower bound of 1
+  d_min_frac: [1.e-10, 0.005] # fraction of n, 1e-10 used to force lower bound of 1
   d_max_frac: [0.005, 0.5] # fraction of n, >= d_min_frac
-  c_min_frac: [1e-10, 0.05] # fraction of n, 1e-10 used to force lower bound of 1
+  c_min_frac: [1.e-10, 0.05] # fraction of n, 1e-10 used to force lower bound of 1
   c_max_frac: [0.05, 0.5] # fraction of n, >= c_min_frac; capped at n
   nout_frac: [0.0, 0.05] # fraction of n  →  nout = round(nout_frac * n)
-  d_max_iter: 1000
-  c_max_iter: 1000
+  d_max_iter: 10
+  c_max_iter: 10
   islocal: false
   isCL: false
   edges_filename: edges.dat
@@ -22,20 +22,18 @@ net_ranges:
 generator:
   net_type: "abcd"
   out_dir: "./examples/generate_dataset-abcd"
-  # sampling:
-  #   method: "random"
-  #   instances: 10
-  #   max_trials: 3
-  #   replicas: 5
-
-  # Uniform grid sampling — uncomment and replace the sampling block above to switch modes.
-  # Uniform grid: one step count applied to every range parameter.
+  # Random sampling: random draws from the parameter ranges, with replacement.
+  sampling:
+    method: "random"
+    instances: 10
+    max_trials: 3
+    replicas: 5
+  # # Uniform grid: one step count applied to every range parameter.
   # sampling:
   #   method: "grid"
   #   grid_steps: 5
   #   replicas: 10
-
-  # Irregular grid: per-parameter step counts (every range parameter must be listed).
+  # # Irregular grid: per-parameter step counts (every range parameter must be listed).
   # sampling:
   #   method: "grid"
   #   grid_steps:
@@ -49,8 +47,7 @@ generator:
   #     c_max_frac: 5
   #     nout_frac: 3
   #   replicas: 10
-
-  # Borderline sampling: sampling graphs from all combinations of min and max values of the parameter ranges.
-  sampling:
-    method: "borderline"
-    replicas: 10
+  # # Borderline sampling: make graphs from all combinations of min and max values of the ranges.
+  # sampling:
+  #   method: "borderline"
+  #   replicas: 10
