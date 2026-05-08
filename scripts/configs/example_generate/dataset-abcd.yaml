@@ -3,9 +3,7 @@ run:
   rng_seed: 43
 
 net_ranges:
-  # n: [1000, 2800]
-  # n: [4600, 6400]
-  n: [8200, 10000]
+  n: [1000, 10000]
   t1: [2.0, 3.0]
   t2: [1.0, 2.0]
   xi: [0.01, 1.0]
@@ -23,23 +21,19 @@ net_ranges:
 
 generator:
   net_type: "abcd"
-  # out_dir: "./data/abcd-final/chunk-1"
-  # out_dir: "./data/abcd-final/chunk-2"
-  out_dir: "./data/abcd-final/chunk-3"
-  # sampling:
-  #   method: "random"
-  #   instances: 10
-  #   max_trials: 3
-  #   replicas: 5
-
-  # Uniform grid sampling — uncomment and replace the sampling block above to switch modes.
-  # Uniform grid: one step count applied to every range parameter.
+  out_dir: "./examples/generate_dataset-abcd"
+  # Random sampling: random draws from the parameter ranges, with replacement.
+  sampling:
+    method: "random"
+    instances: 10
+    max_trials: 3
+    replicas: 5
+  # # Uniform grid: one step count applied to every range parameter.
   # sampling:
   #   method: "grid"
   #   grid_steps: 5
   #   replicas: 10
-
-  # Irregular grid: per-parameter step counts (every range parameter must be listed).
+  # # Irregular grid: per-parameter step counts (every range parameter must be listed).
   # sampling:
   #   method: "grid"
   #   grid_steps:
@@ -53,8 +47,7 @@ generator:
   #     c_max_frac: 5
   #     nout_frac: 3
   #   replicas: 10
-
-  # Borderline sampling: sampling graphs from all combinations of min and max values of the parameter ranges.
-  sampling:
-    method: "borderline"
-    replicas: 10
+  # # Borderline sampling: make graphs from all combinations of min and max values of the ranges.
+  # sampling:
+  #   method: "borderline"
+  #   replicas: 10
