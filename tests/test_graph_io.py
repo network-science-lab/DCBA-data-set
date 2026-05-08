@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 import torch
 from bidict import bidict
-
 from dcba_data_set.graph_io import (
     DCBAHeteroData,
     DCBAInstanceConfig,
@@ -131,7 +130,9 @@ class TestLoadMabcdReport:
         """from_replica_record returns a DCBAHeteroData for each replica."""
         for record in mabcd_records:
             for replica in record.replicas:
-                g = DCBAHeteroData.from_replica_record(replica, record.instance_id, record.net_type)
+                g = DCBAHeteroData.from_replica_record(
+                    replica, record.instance_id, record.net_type
+                )
                 assert isinstance(g, DCBAHeteroData)
 
     def test_graph_metadata(self, mabcd_records: list[InstanceRecord]) -> None:
@@ -139,7 +140,9 @@ class TestLoadMabcdReport:
         instance_ids = {r.instance_id for r in mabcd_records}
         for record in mabcd_records:
             for replica in record.replicas:
-                g = DCBAHeteroData.from_replica_record(replica, record.instance_id, record.net_type)
+                g = DCBAHeteroData.from_replica_record(
+                    replica, record.instance_id, record.net_type
+                )
                 assert g.instance_id in instance_ids
                 assert isinstance(g.replica, torch.Tensor)
                 assert isinstance(g.actors_map, bidict)
@@ -160,7 +163,9 @@ class TestLoadMabcdReport:
         """Community tensor has shape [num_actors, num_layers]; inactive nodes carry 0."""
         for record in mabcd_records:
             for replica in record.replicas:
-                g = DCBAHeteroData.from_replica_record(replica, record.instance_id, record.net_type)
+                g = DCBAHeteroData.from_replica_record(
+                    replica, record.instance_id, record.net_type
+                )
                 community = g["actor"].community
                 num_layers = len(g.layers_map)
                 assert community.ndim == 2
@@ -171,7 +176,9 @@ class TestLoadMabcdReport:
         """Edge indices are non-negative, symmetric, and within actor bounds for all layers."""
         for record in mabcd_records:
             for replica in record.replicas:
-                g = DCBAHeteroData.from_replica_record(replica, record.instance_id, record.net_type)
+                g = DCBAHeteroData.from_replica_record(
+                    replica, record.instance_id, record.net_type
+                )
                 for rel in g.edge_types:
                     ei = g[rel].edge_index
                     assert ei.dtype == torch.long
