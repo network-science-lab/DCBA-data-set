@@ -1,0 +1,6 @@
+outs:
+- md5: 4c811e4a51a95b0592b25e1feb83c38d.dir
+  size: 2355291317
+  nfiles: 4236
+  hash: md5
+  path: abcd-interim-3
