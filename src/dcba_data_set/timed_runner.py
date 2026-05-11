@@ -92,12 +92,18 @@ class TimedRunner:
         """
         Send *config* to the worker and wait up to ``timeout`` seconds for a result.
 
-        Kills and restarts the worker on timeout, then raises ``TimeoutError``.
-        Re-raises any exception reported by the worker as ``RuntimeError``.
+        Kills and restarts the worker on timeout or unexpected worker death, then raises
+        ``TimeoutError``. Re-raises any exception reported by the worker as ``RuntimeError``.
 
         :param config: Configuration object accepted by the generator class.
         """
-        self._parent_conn.send(config)
+        try:
+            self._parent_conn.send(config)
+        except BrokenPipeError:
+            logger.warning("Worker died unexpectedly before receiving config — restarting.")
+            self._start_worker()
+            raise TimeoutError("Worker died unexpectedly — treating as timeout.")
+
         if not self._parent_conn.poll(self._timeout):
             logger.warning("Generation timed out after %ds — restarting worker.", self._timeout)
             self._worker.terminate()
@@ -105,7 +111,13 @@ class TimedRunner:
             self._start_worker()
             raise TimeoutError(f"Generation timed out after {self._timeout}s.")
 
-        status, message = self._parent_conn.recv()
+        try:
+            status, message = self._parent_conn.recv()
+        except EOFError:
+            logger.warning("Worker died mid-execution — restarting.")
+            self._start_worker()
+            raise TimeoutError("Worker died mid-execution — treating as timeout.")
+
         if status == "error":
             raise RuntimeError(message)
 
