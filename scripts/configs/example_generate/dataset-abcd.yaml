@@ -25,9 +25,9 @@ generator:
   # Random sampling: random draws from the parameter ranges, with replacement.
   sampling:
     method: "random"
-    instances: 10
+    instances: 1000
     max_trials: 3
-    replicas: 5
+    replicas: 10
   # # Uniform grid: one step count applied to every range parameter.
   # sampling:
   #   method: "grid"
