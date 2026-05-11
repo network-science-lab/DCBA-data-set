@@ -1,6 +1,7 @@
 run:
   experiment_type: "generate-dataset"
   rng_seed: 43
+  timeout: 300 # seconds; omit to disable
 
 net_ranges:
   n: [1000, 10000]
@@ -21,7 +22,7 @@ net_ranges:
 
 generator:
   net_type: "abcd"
-  out_dir: "./examples/generate_dataset-abcd"
+  out_dir: "./data/abcd-big/chunk-5"
   # Random sampling: random draws from the parameter ranges, with replacement.
   sampling:
     method: "random"
