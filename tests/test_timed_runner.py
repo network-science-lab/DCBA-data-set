@@ -28,12 +28,16 @@ class _ErrorGenerator:
         raise ValueError("generation failed")
 
 
+@pytest.mark.filterwarnings(
+    "ignore:This process.*is multi-threaded, "
+    "use of fork\\(\\) may lead to deadlocks:DeprecationWarning"
+)
 class TestTimedRunner:
     """Verify TimedRunner behaviour for fast, slow, and failing generators."""
 
     def test_fast_generator_completes(self) -> None:
         """A generator that finishes quickly does not raise."""
-        runner = TimedRunner(_FastGenerator, timeout=5)
+        runner = TimedRunner(_FastGenerator, timeout=5, mp_context="fork")
         try:
             runner.run(object())
         finally:
@@ -41,14 +45,14 @@ class TestTimedRunner:
 
     def test_slow_generator_raises_timeout(self) -> None:
         """A generator that exceeds the timeout raises TimeoutError."""
-        runner = TimedRunner(_SlowGenerator, timeout=1)
+        runner = TimedRunner(_SlowGenerator, timeout=1, mp_context="fork")
         with pytest.raises(TimeoutError):
             runner.run(object())
         runner.close()
 
     def test_worker_restarts_after_timeout(self) -> None:
         """A new live worker process replaces the stuck one after a timeout."""
-        runner = TimedRunner(_SlowGenerator, timeout=1)
+        runner = TimedRunner(_SlowGenerator, timeout=1, mp_context="fork")
         try:
             original_pid = runner._worker.pid
             with pytest.raises(TimeoutError):
@@ -60,7 +64,7 @@ class TestTimedRunner:
 
     def test_generator_error_raised_as_runtime_error(self) -> None:
         """An exception inside the worker is re-raised as RuntimeError."""
-        runner = TimedRunner(_ErrorGenerator, timeout=5)
+        runner = TimedRunner(_ErrorGenerator, timeout=5, mp_context="fork")
         try:
             with pytest.raises(RuntimeError, match="generation failed"):
                 runner.run(object())

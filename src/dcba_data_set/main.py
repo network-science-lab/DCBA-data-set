@@ -3,7 +3,6 @@
 import argparse
 import logging
 
-import juliacall  # noqa: F401
 import yaml
 
 from dcba_data_set.ds_generator import DatasetGenerator

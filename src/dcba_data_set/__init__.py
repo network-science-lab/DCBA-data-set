@@ -1,5 +1,7 @@
 """DCBA dataset - tools for generating and loading synthetic multilayer networks."""
 
+import juliacall  # noqa: F401
+
 from dcba_data_set.graph_io import (
     DCBAHeteroData,
     DCBAInstanceConfig,

@@ -460,7 +460,7 @@ wheels = [
 
 [[package]]
 name = "dcba-data-set"
-version = "0.12"
+version = "0.11.0"
 source = { editable = "." }
 dependencies = [
     { name = "bidict" },
