@@ -1,6 +1,6 @@
 [project]
 name = "dcba-data-set"
-version = "0.10.1"
+version = "0.12"
 description = "Add your description here"
 readme = "README.md"
 authors = [
