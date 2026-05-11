@@ -1,6 +1,7 @@
 run:
   experiment_type: "generate-dataset"
   rng_seed: 7
+  timeout: 10
 
 # TODO - this should be further modified to draw n-layered networks!
 net_ranges:
