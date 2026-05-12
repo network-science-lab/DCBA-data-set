@@ -7,7 +7,15 @@ from dcba_data_set.graph_io import (
     DCBAInstanceConfig,
     InstanceRecord,
     ReplicaRecord,
+    load_dataset,
     load_report,
 )
 
-__all__ = ["DCBAInstanceConfig", "DCBAHeteroData", "InstanceRecord", "ReplicaRecord", "load_report"]
+__all__ = [
+    "DCBAInstanceConfig",
+    "DCBAHeteroData",
+    "InstanceRecord",
+    "ReplicaRecord",
+    "load_dataset",
+    "load_report",
+]

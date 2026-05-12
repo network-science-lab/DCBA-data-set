@@ -6,6 +6,13 @@ from dcba_data_set.graph_io.data_models import (
     InstanceRecord,
     ReplicaRecord,
 )
-from dcba_data_set.graph_io.loader import load_report
+from dcba_data_set.graph_io.loader import load_dataset, load_report
 
-__all__ = ["DCBAInstanceConfig", "DCBAHeteroData", "InstanceRecord", "ReplicaRecord", "load_report"]
+__all__ = [
+    "DCBAInstanceConfig",
+    "DCBAHeteroData",
+    "InstanceRecord",
+    "ReplicaRecord",
+    "load_dataset",
+    "load_report",
+]
