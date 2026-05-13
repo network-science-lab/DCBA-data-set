@@ -460,7 +460,7 @@ wheels = [
 
 [[package]]
 name = "dcba-data-set"
-version = "0.11.0"
+version = "0.11.1"
 source = { editable = "." }
 dependencies = [
     { name = "bidict" },
@@ -499,7 +499,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pyg-lib", specifier = ">=0.4.0" },
     { name = "pyyaml", specifier = "~=6.0.1" },
-    { name = "torch", specifier = ">=2.5.1", index = "https://download.pytorch.org/whl/cu121" },
+    { name = "torch", specifier = "~=2.5.1", index = "https://download.pytorch.org/whl/cu121" },
     { name = "torch-geometric", specifier = ">=2.5" },
     { name = "torch-scatter", specifier = ">=2.1.2" },
     { name = "torch-sparse", specifier = ">=0.6.18" },

@@ -88,7 +88,8 @@ class DCBAHeteroData(HeteroData):
         - ``instance_id`` (links to :class:`DCBAInstanceConfig`),
         - ``replica`` (index within the instance; stacks to ``[B]`` tensor after batching),
         - ``actors_map`` (bidict str node_id -> tensor index; list of bidicts after batching),
-        - ``layers_map`` (bidict original layer name -> ``"l_<i>"``;list of bidicts after batching).
+        - ``layers_map`` (bidict original layer name -> ``"l_<i>"``;list of bidicts after batching),
+          batching).
     """
 
     _NATIVE_ATTRS = frozenset({"actors_map", "layers_map"})
