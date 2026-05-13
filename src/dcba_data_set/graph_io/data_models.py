@@ -185,7 +185,6 @@ class DCBAHeteroData(HeteroData):
 
         # Community tensor [num_actors, 1] — raw IDs from file.
         num_actors = len(actors_map)
-        data["actor"].num_nodes = num_actors
         community = torch.zeros(num_actors, 1, dtype=torch.long)
         actor_indices = comm_df["node"].astype(str).map(actors_map.get).values
         community[actor_indices, 0] = torch.tensor(comm_df["community"].values, dtype=torch.long)
@@ -249,7 +248,6 @@ class DCBAHeteroData(HeteroData):
             data["actor", f"l_{i}", "actor"].edge_index = edge_index
 
         num_layers = len(layer_indices)
-        data["actor"].num_nodes = num_actors
         community = torch.zeros(num_actors, num_layers, dtype=torch.long)
         for i, l_idx in enumerate(layer_indices):
             layer_comm = comm_df[comm_df["layer"] == l_idx].reset_index(drop=True)
