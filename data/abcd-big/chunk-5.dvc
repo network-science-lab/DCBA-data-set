@@ -1,0 +1,6 @@
+outs:
+- md5: 2eebf304b35bd9d29af9b085c7db56b7.dir
+  size: 5937009127
+  nfiles: 10755
+  hash: md5
+  path: chunk-5

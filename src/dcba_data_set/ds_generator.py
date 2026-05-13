@@ -16,9 +16,36 @@ from dcba_data_set.config_generators import (
 )
 from dcba_data_set.julia_ports.abcd import ABCDGraphGenerator
 from dcba_data_set.julia_ports.mabcd import mABCDGraphGenerator
+from dcba_data_set.timed_runner import TimedRunner
 from dcba_data_set.utils import create_out_dir
 
 logger = logging.getLogger(__name__)
+
+
+def _append_hard_instance(out_dir: Path, instance_id: str, timed_out_at_replica: int) -> None:
+    """
+    Append a timed-out instance record to ``hard_instances.json`` in *out_dir*.
+
+    Creates the file if it does not yet exist.
+
+    :param out_dir: Directory where ``hard_instances.json`` is written.
+    :param instance_id: UUID of the instance that timed out.
+    :param timed_out_at_replica: 1-based replica index at which the timeout occurred.
+    """
+    path = out_dir / "hard_instances.json"
+    records: list[dict[str, Any]] = []
+    if path.exists():
+        with path.open(encoding="utf-8") as f:
+            records = json.load(f)
+    records.append(
+        {
+            "id": instance_id,
+            "config": f"{instance_id}/config.yaml",
+            "timed_out_at_replica": timed_out_at_replica,
+        }
+    )
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(records, f, indent=2)
 
 
 class DatasetGenerator:
@@ -58,7 +85,8 @@ class DatasetGenerator:
         else:
             raise ValueError(f"Unknown sampling method: {method!r}")
 
-        self._run_instances(configs, generator, net_replicas, config, out_dir, report)
+        timeout: int | None = config["run"].get("timeout")
+        self._run_instances(configs, generator, net_replicas, config, out_dir, report, timeout)
 
         with open(out_dir / "report.json", "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2)
@@ -71,16 +99,30 @@ class DatasetGenerator:
         config: dict[str, Any],
         out_dir: Path,
         report: dict[str, Any],
+        timeout: int | None,
     ) -> None:
         """Iterate over a config list, create instance dirs and run graph generation."""
-        p_bar = tqdm(configs, desc="Instance", leave=False, colour="green")
-        for sampled_config in p_bar:
-            instance_id = str(uuid.uuid4())
-            instance_dir = out_dir / instance_id
-            instance_dir.mkdir(parents=True, exist_ok=True)
-            self._run_instance(
-                sampled_config, instance_id, instance_dir, generator, net_replicas, config, report
-            )
+        runner = TimedRunner(generator, timeout) if timeout is not None else None
+        try:
+            p_bar = tqdm(configs, desc="Instance", leave=False, colour="green")
+            for sampled_config in p_bar:
+                instance_id = str(uuid.uuid4())
+                instance_dir = out_dir / instance_id
+                instance_dir.mkdir(parents=True, exist_ok=True)
+                self._run_instance(
+                    sampled_config,
+                    instance_id,
+                    instance_dir,
+                    generator,
+                    net_replicas,
+                    config,
+                    report,
+                    out_dir,
+                    runner,
+                )
+        finally:
+            if runner is not None:
+                runner.close()
 
     def _run_instance(
         self,
@@ -91,6 +133,8 @@ class DatasetGenerator:
         net_replicas: int,
         config: dict[str, Any],
         report: dict[str, Any],
+        out_dir: Path,
+        runner: TimedRunner | None,
     ) -> None:
         """Write config to disk and generate all replicas for a single instance."""
         with open(instance_dir / "config.yaml", "w", encoding="utf-8") as f:
@@ -110,7 +154,10 @@ class DatasetGenerator:
             sampled_config.seed = config["run"]["rng_seed"] + replica
 
             try:
-                generator()(sampled_config)
+                if runner is not None:
+                    runner.run(sampled_config)
+                else:
+                    generator()(sampled_config)
                 instance_record["replicas"].append(
                     {
                         "replica": replica,
@@ -119,6 +166,14 @@ class DatasetGenerator:
                         "ok": True,
                     }
                 )
+            except TimeoutError:
+                logger.warning(
+                    "Instance %s timed out at replica %d — skipping instance.",
+                    instance_id,
+                    replica,
+                )
+                _append_hard_instance(out_dir, instance_id, replica)
+                break
             except Exception as e:
                 logger.error("Instance %s replica %d failed: %s", instance_id, replica, e)
                 instance_record["replicas"].append(

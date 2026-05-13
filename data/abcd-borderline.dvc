@@ -1,0 +1,6 @@
+outs:
+- md5: 06190705c012d7cbe5f1c84c9e84f12a.dir
+  size: 4574535936
+  nfiles: 10245
+  hash: md5
+  path: abcd-borderline

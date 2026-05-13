@@ -55,6 +55,8 @@ class TestDatasetGeneratorReplicaSeeds:
             net_replicas=net_replicas,
             config=_dataset_config(),
             report={"instances": []},
+            out_dir=instance_dir,
+            runner=None,
         )
 
         return seeds

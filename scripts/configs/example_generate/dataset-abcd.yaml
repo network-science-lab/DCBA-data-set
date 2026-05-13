@@ -1,6 +1,7 @@
 run:
   experiment_type: "generate-dataset"
   rng_seed: 43
+  timeout: 5 # seconds; omit to disable
 
 net_ranges:
   n: [1000, 10000]
@@ -27,7 +28,7 @@ generator:
     method: "random"
     instances: 10
     max_trials: 3
-    replicas: 5
+    replicas: 10
   # # Uniform grid: one step count applied to every range parameter.
   # sampling:
   #   method: "grid"
