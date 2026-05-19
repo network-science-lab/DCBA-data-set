@@ -36,11 +36,12 @@ data.
 All datasets live under `data/` and are tracked by DVC. After `dvc pull` the following are
 available:
 
-| Dataset           | Instances | Graphs | Notes                            |
-| ----------------- | --------- | ------ | -------------------------------- |
-| `abcd-interim`    | 200       | 2 000  | small dataset for test trainings |
-| `abcd-borderline` | 486       | 4 860  | hard graphs                      |
-| `abcd-big`        | 8 744     | 87 440 | 10 chunks                        |
+| Dataset               | Instances | Graphs | Notes                                                                    |
+| --------------------- | --------- | ------ | ------------------------------------------------------------------------ |
+| `abcd-interim`        | 200       | 2 000  | small dataset for test trainings                                         |
+| `abcd-borderline`     | 486       | 4 860  | hard graphs                                                              |
+| `abcd-big`            | 8 744     | 87 440 | 10 chunks                                                                |
+| `abcd-distinct-comms` | 200       | 2 000  | small dataset for validation of communities detection in graph embedding |
 
 Graphs within `abcd-big` are prefixed with their chunk name in the instance ID (e.g.
 `chunk-7/3f1a...`). Instances that timed out mid-generation are excluded by default.
