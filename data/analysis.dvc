@@ -1,0 +1,6 @@
+outs:
+- md5: ccf34434cb9ccf606d2ec31fed05fdb2.dir
+  size: 124209
+  nfiles: 4
+  hash: md5
+  path: analysis
