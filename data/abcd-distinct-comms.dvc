@@ -1,0 +1,6 @@
+outs:
+- md5: a27ce11516135d215b5f94e1ad98e1ec.dir
+  size: 523855866
+  nfiles: 4199
+  hash: md5
+  path: abcd-distinct-comms
