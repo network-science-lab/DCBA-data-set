@@ -1,6 +1,6 @@
 [project]
 name = "dcba-data-set"
-version = "0.12.0"
+version = "0.13.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [
@@ -24,6 +24,8 @@ dependencies = [
     "torch-scatter>=2.1.2",
     "torch-sparse>=0.6.18",
     "pre-commit>=4.5.1",
+    "python-igraph>=1.0.0",
+    "leidenalg>=0.12.0",
 ]
 
 [project.scripts]
