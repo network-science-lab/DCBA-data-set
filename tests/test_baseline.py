@@ -1,6 +1,7 @@
 """Unit tests for BaselineConfig against the ABCD, mABCD, and Karate test datasets."""
 
 import pytest
+import torch
 
 from dcba_data_set.baseline import BaselineConfig
 from dcba_data_set.graph_io import DCBAHeteroData, InstanceRecord
@@ -44,6 +45,12 @@ def abcd_config(abcd_graph: DCBAHeteroData) -> ABCDConfig:
 def karate_config(karate_graph: DCBAHeteroData) -> ABCDConfig:
     """Compute the baseline ABCDConfig from the karate graph once for the entire module."""
     return BaselineConfig(karate_graph).get_config()
+
+
+@pytest.fixture(scope="module")
+def karate_detected_config(karate_graph: DCBAHeteroData) -> ABCDConfig:
+    """Compute the baseline ABCDConfig from Leiden-detected communities on the karate graph."""
+    return BaselineConfig(karate_graph, detect_communities=True, leiden_seed=42).get_config()
 
 
 class TestBaselineAbcd:
@@ -113,3 +120,42 @@ class TestBaselineKarate:
     def test_community_bounds(self, karate_config: ABCDConfig) -> None:
         """Minimum community size does not exceed maximum community size."""
         assert karate_config.c_min <= karate_config.c_max
+
+
+class TestBaselineKarateDetectedCommunities:
+    """Tests for BaselineConfig using Leiden-detected communities on the karate graph."""
+
+    def test_construction(self, karate_detected_config: ABCDConfig) -> None:
+        """BaselineConfig can be constructed with detect_communities=True."""
+        assert isinstance(karate_detected_config, ABCDConfig)
+
+    def test_config_n_matches_graph(
+        self, karate_detected_config: ABCDConfig, karate_graph: DCBAHeteroData
+    ) -> None:
+        """Extracted n matches the number of actors in the graph, regardless of community source."""
+        assert karate_detected_config.n == len(karate_graph.actors_map)
+
+    def test_noise_bounds(self, karate_detected_config: ABCDConfig) -> None:
+        """Noise ratio xi lies in [0, 1]."""
+        assert 0.0 <= karate_detected_config.xi <= 1.0
+
+    def test_community_bounds(self, karate_detected_config: ABCDConfig) -> None:
+        """Minimum community size does not exceed maximum community size."""
+        assert karate_detected_config.c_min <= karate_detected_config.c_max
+
+    def test_communities_are_zero_indexed_and_contiguous(
+        self, karate_graph: DCBAHeteroData
+    ) -> None:
+        """Leiden-detected community labels are zero-indexed and contiguous."""
+        baseline = BaselineConfig(karate_graph, detect_communities=True, leiden_seed=42)
+        unique_communities = baseline.communities.unique(sorted=True)
+        expected = torch.arange(unique_communities.numel())
+        assert torch.equal(unique_communities, expected)
+
+    def test_detected_communities_differ_from_ground_truth(
+        self, karate_graph: DCBAHeteroData
+    ) -> None:
+        """Leiden detection is independent of the ground-truth community count."""
+        ground_truth = BaselineConfig(karate_graph)
+        detected = BaselineConfig(karate_graph, detect_communities=True, leiden_seed=42)
+        assert detected.communities.size(0) == ground_truth.communities.size(0)

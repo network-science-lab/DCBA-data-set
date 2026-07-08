@@ -1,5 +1,7 @@
 """Module for computing baseline ABCDConfig parameters from a graph."""
 
+import igraph
+import leidenalg
 import torch
 from torch_geometric.utils import degree
 
@@ -11,14 +13,44 @@ from dcba_data_set.powerlaw import fit_truncated_power_law
 class BaselineConfig:
     """Class for computing baseline ABCDConfig parameters from a given graph."""
 
-    def __init__(self, graph: DCBAHeteroData, d_max_iter: int = 1000, c_max_iter: int = 1000):
-        """Initialize the BaselineConfig by extracting necessary information from the graph."""
+    def __init__(
+        self,
+        graph: DCBAHeteroData,
+        d_max_iter: int = 1000,
+        c_max_iter: int = 1000,
+        detect_communities: bool = False,
+        leiden_resolution: float = 1.0,
+        leiden_seed: int | None = None,
+    ):
+        """
+        Initialize the BaselineConfig by extracting necessary information from the graph.
+
+        :param graph: Single-layer graph to extract the baseline config from.
+        :param d_max_iter: Maximum number of iterations passed to the resulting ABCDConfig.
+        :param c_max_iter: Maximum number of iterations passed to the resulting ABCDConfig.
+        :param detect_communities: If True, ignore the ground-truth communities stored on the
+            graph and instead detect them from the graph structure using the Leiden algorithm.
+            Simulates the scenario where ground-truth communities are not available.
+        :param leiden_resolution: Resolution parameter passed to the Leiden algorithm. Only used
+            when ``detect_communities`` is True.
+        :param leiden_seed: Random seed for the Leiden algorithm. Only used when
+            ``detect_communities`` is True.
+        """
         if graph.edge_types != [("actor", "l_0", "actor")]:
             raise NotImplementedError(
                 "Baseline config extraction only supports single layer graphs."
             )
         self.src, self.dst = graph["actor", "l_0", "actor"].edge_index
-        self.communities = BaselineConfig._prepare_communities(graph["actor"].community)
+        if detect_communities:
+            self.communities = BaselineConfig._detect_communities(
+                self.src,
+                self.dst,
+                graph["actor"].community.size(0),
+                resolution=leiden_resolution,
+                seed=leiden_seed,
+            )
+        else:
+            self.communities = BaselineConfig._prepare_communities(graph["actor"].community)
         self.n = self.communities.size(0)
         self.e = (
             graph.num_edges
@@ -32,6 +64,28 @@ class BaselineConfig:
     def _prepare_communities(communities: torch.Tensor) -> torch.Tensor:
         """Prepare the community assignments by ensuring they are zero-indexed and contiguous."""
         return communities[:, 0] - communities.min()
+
+    @staticmethod
+    def _detect_communities(
+        src: torch.Tensor,
+        dst: torch.Tensor,
+        num_nodes: int,
+        resolution: float = 1.0,
+        seed: int | None = None,
+    ) -> torch.Tensor:
+        """Detect zero-indexed community assignments from the graph structure using Leiden."""
+        edges = torch.stack([src, dst], dim=1).tolist()
+        ig_graph = igraph.Graph(n=num_nodes, edges=edges, directed=False)
+        # src/dst hold both directed copies of each undirected edge; igraph treats (u, v) and
+        # (v, u) as a multi-edge pair here, so simplify() collapses each back to a single edge.
+        ig_graph.simplify(multiple=True, loops=True)
+        partition = leidenalg.find_partition(
+            ig_graph,
+            leidenalg.RBConfigurationVertexPartition,
+            resolution_parameter=resolution,
+            seed=seed,
+        )
+        return torch.tensor(partition.membership, dtype=torch.long)
 
     def _get_noise(self) -> float:
         """Calculate the noise ratio (xi) based on the proportion of inter-community edges."""
