@@ -1,10 +1,11 @@
 [project]
 name = "dcba-data-set"
-version = "0.13.0"
-description = "Add your description here"
+version = "1.0.0"
+description = "DCBA data set: generators and loaders for synthetic ABCD and mABCD benchmark graphs"
 readme = "README.md"
 authors = [
-    { name = "Michał Czuba", email = "michal.czuba.1995@gmail.com" }
+    { name = "Michał Czuba", email = "michal.czuba.1995@gmail.com" },
+    { name = "Łukasz Kraiński", email = "lukasz.krainski123@gmail.com" }
 ]
 requires-python = ">=3.12"
 dependencies = [

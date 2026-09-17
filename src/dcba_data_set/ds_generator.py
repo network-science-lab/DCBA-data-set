@@ -49,7 +49,12 @@ def _append_hard_instance(out_dir: Path, instance_id: str, timed_out_at_replica:
 
 
 class DatasetGenerator:
-    """Generate a dataset of graphs by sampling configurations and running the graph generator."""
+    """
+    Generate a dataset of graphs by sampling configurations and running the graph generator.
+
+    TODO: For mABCD, the dataset generator should be modified to generate n-layered networks
+    (currently it is hardcoded to 3), as it hasn't been used in the paper.
+    """
 
     def __call__(self, config: dict[str, Any]) -> Any:
         """Run the dataset generation loop and write outputs and a report to ``out_dir``."""

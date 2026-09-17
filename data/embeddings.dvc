@@ -1,0 +1,5 @@
+outs:
+- md5: 2aa2e5ade04f354f3b89627402555e7a.dir
+  nfiles: 1
+  hash: md5
+  path: embeddings
