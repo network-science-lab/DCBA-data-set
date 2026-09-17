@@ -120,9 +120,9 @@ class BaselineConfig:
         return int((self._get_outlier_scores() < 0).sum().item())
 
     def _has_outlier_community(self) -> bool:
-        """
-        Check whether community 0 is a reserved ABCD outlier bucket rather than a genuine
-        community. ABCD's generator always assigns outlier nodes to community 0 (when the
+        """Check whether community 0 is a reserved ABCD outlier bucket.
+
+        ABCD's generator always assigns outlier nodes to community 0 (when the
         graph was generated with outliers), so community 0's nodes are almost entirely
         flagged as outliers by their own B(v) score. A genuine (e.g. ground-truth or
         Leiden-detected) community only rarely has a majority of its nodes score as outliers.
