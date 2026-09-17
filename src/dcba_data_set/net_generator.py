@@ -11,7 +11,7 @@ from dcba_data_set.utils import create_out_dir
 
 
 class mABCDGenerator:
-    """Wrapper for the MABCD graph generator runnable from CLI."""
+    """Wrapper for the mABCD graph generator runnable from CLI."""
 
     julia_class = mABCDGraphGenerator
     julia_config = mABCDConfig
