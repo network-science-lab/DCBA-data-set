@@ -59,3 +59,26 @@ def fit_truncated_power_law(
     )
 
     return best_alpha
+
+
+def estimate_natural_cutoff(data: torch.Tensor, alpha: float, max_bound: int | None = None) -> int:
+    """
+    Estimate the natural (structural) cutoff of a truncated power-law sample.
+
+    A finite sample from a heavy-tailed power law systematically underestimates the true
+    upper bound, since the largest few values one would expect to see only appear in much
+    larger samples. The natural cutoff formula xmax = xmin * n^(1/(alpha-1)) gives the point
+    beyond which, given n samples, fewer than one draw is expected under the fitted
+    distribution. See Barabasi, "Network Science", Ch. 4.
+
+    As alpha approaches 1, 1/(alpha-1) blows up and the formula can predict values with no
+    physical meaning (e.g. a node degree exceeding the number of nodes in the graph), so the
+    result is clamped to ``max_bound`` when provided.
+    """
+    xmin = torch.min(data).item()
+    n = data.numel()
+    xmax_hat = xmin * n ** (1.0 / (alpha - 1.0))
+    natural_cutoff = max(round(xmax_hat), int(torch.max(data).item()))
+    if max_bound is not None:
+        natural_cutoff = min(natural_cutoff, max_bound)
+    return natural_cutoff
